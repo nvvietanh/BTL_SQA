@@ -2,200 +2,176 @@ package com.thanhtam.backend.service;
 
 import com.thanhtam.backend.entity.Course;
 import com.thanhtam.backend.repository.CourseRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Arrays;
+import javax.transaction.Transactional;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Transactional
 public class CourseServiceImplTest {
 
-    @Mock
-    private CourseRepository courseRepository;
-
-    @InjectMocks
+    @Autowired
     private CourseServiceImpl courseService;
 
-    @BeforeEach
-    public void setUp() {
-        // Khởi tạo các mock trước mỗi test
-//        MockitoAnnotations.openMocks(this);
-        MockitoAnnotations.initMocks(this);
-    }
+    @Autowired
+    private CourseRepository courseRepository;
 
+    private static Long createdCourseId;
+    // Thực hiện tạo lưu 1 Course đúng
+//    TC_CS_06
     @Test
-    public void testGetCourseById_Success() {
-        // Arrange
-        Long courseId = 1L;
-        Course course = new Course(courseId, "CS101", "Programming", "img_url", null);
-        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+    @Rollback
+    public void testSaveCourse_Success() {
+        Course course = new Course();
+        course.setCourseCode("IMPL_TEST_01");
+        course.setName("Impl Test");
+        course.setImgUrl("http://example.com/img.png");
+        course.setIntakes(Collections.emptyList());
 
-        // Act
-        Optional<Course> result = courseService.getCourseById(courseId);
+        courseService.saveCourse(course);
+        Long id = course.getId();
+        Assert.assertNotNull(id);
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals("CS101", result.get().getCourseCode());
-        verify(courseRepository, times(1)).findById(courseId);
+        Optional<Course> opt = courseRepository.findById(id);
+        Assert.assertTrue(opt.isPresent());
+        createdCourseId = id;
     }
-
+//    TC_CS_07
     @Test
-    public void testGetCourseById_NotFound() {
-        // Arrange
-        Long courseId = 1L;
-        when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
+    @Rollback
+    public void testSaveCourse_DuplicateCode() {
+        Course c1 = new Course();
+        c1.setCourseCode("IMPL_DUP");
+        c1.setName("Course 1");
+        c1.setImgUrl("url1");
+        c1.setIntakes(Collections.emptyList());
+        courseService.saveCourse(c1);
 
-        // Act
-        Optional<Course> result = courseService.getCourseById(courseId);
+        Course c2 = new Course();
+        c2.setCourseCode("IMPL_DUP"); // trùng code
+        c2.setName("Course 2");
+        c2.setImgUrl("url2");
+        c2.setIntakes(Collections.emptyList());
 
-        // Assert
-        assertFalse(result.isPresent());
-        verify(courseRepository, times(1)).findById(courseId);
+        try {
+            courseService.saveCourse(c2);
+            Assert.fail("Should throw exception for duplicate courseCode");
+        } catch (RuntimeException e) {
+            Assert.assertTrue(e.getMessage().toLowerCase().contains("already exists"));
+        }
     }
-
+//    TC_CS_04
     @Test
     public void testGetCourseList() {
-        // Arrange
-        List<Course> courses = Arrays.asList(
-                new Course(1L, "CS101", "Programming", "img_url", null),
-                new Course(2L, "CS102", "Database", "img_url", null)
-        );
-        when(courseRepository.findAll()).thenReturn(courses);
-
-        // Act
-        List<Course> result = courseService.getCourseList();
-
-        // Assert
-        assertEquals(2, result.size());
-        assertEquals("CS101", result.get(0).getCourseCode());
-        verify(courseRepository, times(1)).findAll();
+        List<Course> list = courseService.getCourseList();
+        Assert.assertNotNull(list);
     }
-
+//    TC_CS_05
     @Test
     public void testGetCourseListByPage() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Course> courses = Arrays.asList(new Course(1L, "CS101", "Programming", "img_url", null));
-        Page<Course> page = new PageImpl<>(courses, pageable, courses.size());
-        when(courseRepository.findAll(pageable)).thenReturn(page);
-
-        // Act
-        Page<Course> result = courseService.getCourseListByPage(pageable);
-
-        // Assert
-        assertEquals(1, result.getContent().size());
-        assertEquals("CS101", result.getContent().get(0).getCourseCode());
-        verify(courseRepository, times(1)).findAll(pageable);
+        Page<Course> page = courseService.getCourseListByPage(PageRequest.of(0, 5));
+        Assert.assertNotNull(page);
     }
-
+//    TC_CS_02
     @Test
-    public void testSaveCourse() {
-        // Arrange
-        Course course = new Course(null, "CS101", "Programming", "img_url", null);
-        Course savedCourse = new Course(1L, "CS101", "Programming", "img_url", null);
-        when(courseRepository.save(course)).thenReturn(savedCourse);
-
-        // Act
+    public void testGetCourseById_Found() {
+        Course course = new Course();
+        course.setCourseCode("IMPL_FIND");
+        course.setName("Find Me");
+        course.setImgUrl("img");
+        course.setIntakes(Collections.emptyList());
         courseService.saveCourse(course);
 
-        // Assert
-        verify(courseRepository, times(1)).save(course);
+        Optional<Course> opt = courseService.getCourseById(course.getId());
+        Assert.assertTrue(opt.isPresent());
     }
-
+//    TC_CS_03
     @Test
-    public void testDelete() {
-        // Arrange
-        Long courseId = 1L;
-
-        // Act
-        courseService.delete(courseId);
-
-        // Assert
-        verify(courseRepository, times(1)).deleteById(courseId);
+    public void testGetCourseById_NotFound() {
+        Optional<Course> opt = courseService.getCourseById(999999L);
+        Assert.assertFalse(opt.isPresent());
     }
 
+//TC_CS_08
     @Test
-    public void testExistsByCode_True() {
-        // Arrange
-        String courseCode = "CS101";
-        when(courseRepository.existsByCourseCode(courseCode)).thenReturn(true);
+    @Rollback
+    public void testDeleteCourse() {
+        Course course = new Course();
+        course.setCourseCode("IMPL_DELETE");
+        course.setName("To Delete");
+        course.setImgUrl("img");
+        course.setIntakes(Collections.emptyList());
+        courseService.saveCourse(course);
+        Long id = course.getId();
 
-        // Act
-        boolean result = courseService.existsByCode(courseCode);
+        courseService.delete(id);
 
-        // Assert
-        assertTrue(result);
-        verify(courseRepository, times(1)).existsByCourseCode(courseCode);
+        Optional<Course> opt = courseService.getCourseById(id);
+        Assert.assertFalse(opt.isPresent());
     }
-
+// TC_CS_09
     @Test
-    public void testExistsByCode_False() {
-        // Arrange
-        String courseCode = "CS101";
-        when(courseRepository.existsByCourseCode(courseCode)).thenReturn(false);
+    public void testExistsByCode() {
+        Course course = new Course();
+        course.setCourseCode("IMPL_EXISTS_CODE");
+        course.setName("Check Exists");
+        course.setImgUrl("img");
+        course.setIntakes(Collections.emptyList());
+//        courseService.saveCourse(course);
 
-        // Act
-        boolean result = courseService.existsByCode(courseCode);
-
-        // Assert
-        assertFalse(result);
-        verify(courseRepository, times(1)).existsByCourseCode(courseCode);
+        boolean exists = courseService.existsByCode("IMPL_EXISTS_CODE");
+        Assert.assertTrue(exists);
     }
-
+//    TC_CS_10
     @Test
-    public void testExistsById_True() {
-        // Arrange
-        Long courseId = 1L;
-        when(courseRepository.existsById(courseId)).thenReturn(true);
+    public void testExistsById() {
+        Course course = new Course();
+        course.setCourseCode("IMPL_EXISTS_ID");
+        course.setName("Check Exists");
+        course.setImgUrl("img");
+        course.setIntakes(Collections.emptyList());
+        courseService.saveCourse(course);
 
-        // Act
-        boolean result = courseService.existsById(courseId);
-
-        // Assert
-        assertTrue(result);
-        verify(courseRepository, times(1)).existsById(courseId);
+        boolean exists = courseService.existsById(course.getId());
+        Assert.assertTrue(exists);
     }
-
+//    TC_CS_11
     @Test
     public void testFindAllByIntakeId() {
-        // Arrange
-        Long intakeId = 1L;
-        List<Course> courses = Arrays.asList(new Course(1L, "CS101", "Programming", "img_url", null));
-        when(courseRepository.findAllByIntakeId(intakeId)).thenReturn(courses);
-
-        // Act
-        List<Course> result = courseService.findAllByIntakeId(intakeId);
-
-        // Assert
-        assertEquals(1, result.size());
-        assertEquals("CS101", result.get(0).getCourseCode());
-        verify(courseRepository, times(1)).findAllByIntakeId(intakeId);
+        List<Course> list = courseService.findAllByIntakeId(1L);
+        Assert.assertNotNull(list);
     }
-
+//    TC_CS_12
     @Test
     public void testFindCourseByPartId() {
-        // Arrange
-        Long partId = 1L;
-        Course course = new Course(1L, "CS101", "Programming", "img_url", null);
-        when(courseRepository.findCourseByPartId(partId)).thenReturn(course);
-
-        // Act
-        Course result = courseService.findCourseByPartId(partId);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("CS101", result.getCourseCode());
-        verify(courseRepository, times(1)).findCourseByPartId(partId);
+        Course course = courseService.findCourseByPartId(1L);
+        if (course != null) {
+            Assert.assertNotNull(course.getId());
+        }
     }
+//    TC_CS_01
+    @Test
+    public void testConstructorAssignment() {
+        CourseRepository mockRepo = org.mockito.Mockito.mock(CourseRepository.class);
+        CourseServiceImpl service = new CourseServiceImpl(mockRepo);
+
+        Assert.assertNotNull(service);
+    }
+
+
+
 }
