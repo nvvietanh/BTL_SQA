@@ -1,0 +1,24 @@
+ID,Class,Method,Mục tiêu kiểm thử,Input,Output kỳ vọng,Ghi chú
+TC_QS_01,QuestionServiceImpl,getQuestionById,Kiểm tra phương thức getQuestionById trả về câu hỏi khi ID tồn tại,ID = 8L (tồn tại trong DB),Optional<Question> có giá trị,-
+TC_QS_02,QuestionServiceImpl,getQuestionById,Kiểm tra phương thức getQuestionById trả về Optional.empty() khi ID không tồn tại,ID = 999L (không tồn tại trong DB),Optional.empty(),-
+TC_QS_03,QuestionServiceImpl,getQuestionByPart,Kiểm tra phương thức getQuestionByPart trả về danh sách câu hỏi theo Part,part (lấy từ DB),List<Question> chứa các câu hỏi thuộc Part,-
+TC_QS_04,QuestionServiceImpl,getQuestionPointList,Kiểm tra phương thức getQuestionPointList trả về danh sách câu hỏi từ danh sách điểm,List<ExamQuestionPoint>,List<Question> tương ứng với danh sách điểm,-
+TC_QS_05,QuestionServiceImpl,convertFromQuestionList,Kiểm tra phương thức convertFromQuestionList chuyển đổi Question thành AnswerSheet,List<Question>,List<AnswerSheet>,-
+TC_QS_06,QuestionServiceImpl,save,Kiểm tra phương thức save tự động tính điểm cho câu hỏi mức EASY,Question với difficultyLevel = EASY,point = 5,-
+TC_QS_07,QuestionServiceImpl,save,Kiểm tra phương thức save tự động tính điểm cho câu hỏi mức MEDIUM,Question với difficultyLevel = MEDIUM,point = 10,-
+TC_QS_08,QuestionServiceImpl,save,Kiểm tra phương thức save tự động tính điểm cho câu hỏi mức HARD,Question với difficultyLevel = HARD,point = 15,-
+TC_QS_09,QuestionServiceImpl,update,Kiểm tra phương thức update cập nhật thông tin câu hỏi,Question đã được cập nhật,Gọi save() để lưu câu hỏi,-
+TC_QS_10,QuestionServiceImpl,delete,Kiểm tra phương thức delete xóa câu hỏi,ID = 8L,Gọi deleteById() để xóa câu hỏi,-
+TC_QS_11,QuestionServiceImpl,findQuestionsByPart,Kiểm tra phương thức findQuestionsByPart trả về danh sách câu hỏi theo Part có phân trang,Pageable và Part,Page<Question>,-
+TC_QS_12,QuestionServiceImpl,findQuestionsByPartAndDeletedFalse,Kiểm tra phương thức findQuestionsByPartAndDeletedFalse trả về danh sách câu hỏi chưa bị xóa theo Part,Pageable và Part,Page<Question> chứa các câu hỏi chưa bị xóa,-
+TC_QS_13,QuestionServiceImpl,findQuestionTextById,Kiểm tra phương thức findQuestionTextById trả về nội dung câu hỏi theo ID,questionId = 8L,String chứa nội dung câu hỏi,-
+TC_QS_14,QuestionServiceImpl,getQuestionList,Kiểm tra phương thức getQuestionList trả về danh sách tất cả câu hỏi,Không có,List<Question> chứa tất cả câu hỏi,-
+TC_QS_15,QuestionServiceImpl,findQuestionsByPartAndDeletedFalse,Kiểm tra phương thức findQuestionsByPartAndDeletedFalse xử lý trường hợp part null,Pageable và Part = null,Page<Question> rỗng,-
+TC_QS_16,QuestionServiceImpl,findQuestionsByPart,Kiểm tra phương thức findQuestionsByPart xử lý trường hợp part null,Pageable và Part = null,Page<Question> rỗng,-
+TC_QS_17,QuestionServiceImpl,getQuestionByPart,Kiểm tra phương thức getQuestionByPart xử lý trường hợp part null,Part = null,List<Question> rỗng,-
+TC_QS_18,QuestionServiceImpl,getQuestionPointList,Kiểm tra phương thức getQuestionPointList xử lý trường hợp danh sách rỗng,List<ExamQuestionPoint> rỗng,List<Question> rỗng,-
+TC_QS_19,QuestionServiceImpl,convertFromQuestionList,Kiểm tra phương thức convertFromQuestionList xử lý trường hợp danh sách rỗng,List<Question> rỗng,List<AnswerSheet> rỗng,-
+TC_QS_20,QuestionServiceImpl,findQuestionTextById,Kiểm tra phương thức findQuestionTextById xử lý trường hợp id không tồn tại,questionId = 999L (không tồn tại),null,-
+TC_QS_21,QuestionServiceImpl,save,Kiểm tra phương thức save xử lý trường hợp question null,Question = null,NullPointerException,-
+TC_QS_22,QuestionServiceImpl,update,Kiểm tra phương thức update xử lý trường hợp question null,Question = null,NullPointerException,-
+TC_QS_23,QuestionServiceImpl,delete,Kiểm tra phương thức delete xử lý trường hợp id null,ID = null,IllegalArgumentException,- 
