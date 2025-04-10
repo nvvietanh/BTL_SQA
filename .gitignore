@@ -1,0 +1,51 @@
+# ========================
+# 1. Java & Spring Boot
+# ========================
+/backend/target/
+/backend/.idea/
+/backend/.classpath
+/backend/.project
+/backend/.settings/
+/backend/*.iml
+
+# Logs
+*.log
+
+# IntelliJ
+*.iws
+*.iml
+*.ipr
+
+# Maven wrapper
+/backend/.mvn/
+/backend/mvnw
+/backend/mvnw.cmd
+!/backend/.mvn/wrapper/maven-wrapper.jar
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# ========================
+# 2. Angular & Node.js
+# ========================
+/front-end-user/node_modules/
+/front-end-user/dist/
+/front-end-user/.angular/cache/
+/front-end-user/.angular/config.json
+/front-end-user/.output/
+/front-end-user/.cache/
+/front-end-user/.vscode/
+
+# Npm/yarn logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========================
+# 3. General
+# ========================
+*.orig
+*.swp
+*.swo
+.env
