@@ -61,6 +61,8 @@ public class ExamServiceCHINH {
     private CourseService courseService;
 
     @Test
+
+    // TS_ES_01
     public void testCreateExam_Success() {
         Assert.assertNotNull("ExamService bị null!", examService);
         Assert.assertNotNull("UserService bị null!", userService);
@@ -123,6 +125,7 @@ public class ExamServiceCHINH {
         Assert.assertNotNull(examFromDb.getCreatedBy());
     }
 
+    // TC_ES_02
     @Test
     public void testCreateExam_Fail_IDMismatch_1() {
         Assert.assertNotNull("ExamService bị null!", examService);
@@ -238,6 +241,7 @@ public class ExamServiceCHINH {
         Assert.assertNull("Exam ID sau khi lưu bị null!", savedExam.getId());
 
     }
+    //TC_ES_04
     @Test
     public void testCreateExam_Fail_IDMismatch_3() {
         Assert.assertNotNull("ExamService bị null!", examService);
@@ -287,7 +291,7 @@ public class ExamServiceCHINH {
         Assert.assertNull("Exam ID sau khi lưu bị null!", savedExam.getId());
 
     }
-
+    // TC_ES_05
     @Test
     @Transactional
     public void testGetExamsByPage_Admin() {
@@ -309,29 +313,6 @@ public class ExamServiceCHINH {
 
     }
 
-    @Test
-    @Transactional
-    public void testGetExamsByPage_Lecturer() {
-        // Tạo người dùng LECTURER
-        User foundUser = userService.getUserByUsername("tamht298").orElse(null);
-        Assert.assertNotNull("Giang vien không tồn tại", foundUser);
-
-        // Kiểm tra user phải có role LECTURER
-        Assert.assertTrue(
-                "User không phải lecturer " + foundUser.getRoles(),
-                foundUser.getRoles().stream()
-                        .anyMatch(role -> role.getName().equals(ERole.ROLE_LECTURER))
-        );
-
-        // Tạo Pageable
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
-
-        // Gọi phương thức lấy bài thi cho LECTURER
-        Page<Exam> exams = examService.findAllByCreatedBy_Username(pageable, foundUser.getUsername());
-
-        // Kiểm tra kết quả
-        Assert.assertNotNull("Danh sách bài thi bị null", exams);
-    }
 
     @Test
     @Transactional
@@ -358,7 +339,7 @@ public class ExamServiceCHINH {
         // Kiểm tra kết quả
         Assert.assertNotNull("Danh sách bài thi bị null", exams);
     }
-
+    // TC_ES_06
     @Test
     @Transactional
     public void testCancelExam() {
@@ -371,7 +352,7 @@ public class ExamServiceCHINH {
         Assert.assertNotNull("Exam bị null sau khi huỷ", exam);
         Assert.assertTrue("Exam chưa được huỷ", exam.isCanceled());
     }
-
+//    TC_ES_07
     @Test
     @Transactional
     public void testGetExamById_ExamNotFound() {
@@ -384,7 +365,7 @@ public class ExamServiceCHINH {
         Assert.assertTrue( "Kỳ thi không nên tồn tại với ID: " + examId,result.isPresent());
     }
 
-
+    //    TC_ES_08
     @Test
     @Transactional
     public void testGetExamById_ExamFound() {
@@ -435,6 +416,32 @@ public class ExamServiceCHINH {
         Assert.assertEquals(Optional.of(1), Optional.of(choiceList.getPoint()));
     }
 
+    //TC_US_09
+    @Test
+    @Transactional
+    public void testGetExamsByPage_Lecturer() {
+        // Tạo người dùng LECTURER
+        User foundUser = userService.getUserByUsername("tamht298").orElse(null);
+        Assert.assertNotNull("Giang vien không tồn tại", foundUser);
+
+        // Kiểm tra user phải có role LECTURER
+        Assert.assertTrue(
+                "User không phải lecturer " + foundUser.getRoles(),
+                foundUser.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals(ERole.ROLE_LECTURER))
+        );
+
+        // Tạo Pageable
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
+
+        // Gọi phương thức lấy bài thi cho LECTURER
+        Page<Exam> exams = examService.findAllByCreatedBy_Username(pageable, foundUser.getUsername());
+
+        // Kiểm tra kết quả
+        Assert.assertNotNull("Danh sách bài thi bị null", exams);
+    }
+
+// TC_ES_10
     @Test
     @Transactional
     public void testCreateExamWithUsers() {
@@ -470,7 +477,7 @@ public class ExamServiceCHINH {
             Assert.assertTrue("User ID " + id + " không được gán!", actualUserIds.contains(id));
         }
     }
-
+ // TC_ES_11
     @Test
     @Transactional
     public void testGetExamListByUsername() {
@@ -487,7 +494,7 @@ public class ExamServiceCHINH {
             Assert.assertNotNull("Exam không tồn tại!", examUser.getExam());
         }
     }
-
+ // TC_ES_12
     @Test
     @Transactional
     public void testFindByExamAndUser() {
@@ -566,6 +573,7 @@ public class ExamServiceCHINH {
         Assert.assertEquals("Exam ID không đúng!", exam.getId(), foundExamUser.getExam().getId());
         Assert.assertEquals("Username không đúng!", user.getUsername(), foundExamUser.getUser().getUsername());
     }
+    // TC_ES_13
     @Test
     @Transactional
     public void testUpdateExamUser() {
@@ -590,6 +598,7 @@ public class ExamServiceCHINH {
         Assert.assertTrue("Chua Cap nhat user da hoan thanh bai thi",foundExamUser.getIsFinished());
     }
 
+ //TC_ES_14
     @Test
     @Transactional
     public void testGetCompleteExams() {
@@ -697,7 +706,7 @@ public class ExamServiceCHINH {
         }
     }
 
-
+     // TC_ES_15
     @Test
     @Transactional
     public void testFindAllByExam_Id() {
@@ -718,7 +727,7 @@ public class ExamServiceCHINH {
         }
 
     }
-
+     // TC_ES_16
     @Test
     @Transactional
     public void testFindExamUsersByIsFinishedIsTrueAndExam_Id() {
