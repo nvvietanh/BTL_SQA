@@ -51,7 +51,7 @@ export class UploadFileService {
     });
   }
 
-  getFiles(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/aws/file/all`);
-  }
+  // getFiles(): Observable<any> {
+  //   return this.http.get(`${this.baseUrl}/aws/file/all`);
+  // }
 }
