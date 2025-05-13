@@ -66,6 +66,7 @@ public class ExamController {
 //        return new ResponseEntity<>(exams, HttpStatus.OK);
 //    }
 
+    // Lấy danh sách bài thi theo ADMIN HOAC LECTURE
     @GetMapping(value = "/exams")
     @PreAuthorize("hasRole('ADMIN') or hasRole('LECTURER')")
     public PageResult getExamsByPage(@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
@@ -81,7 +82,7 @@ public class ExamController {
         return new PageResult(examPage);
 
     }
-
+    // Lấy ra danh sách các bài thi của 1 người dùng theo username
     @GetMapping(value = "/exams/list-all-by-user")
     public ResponseEntity<List<ExamUser>> getAllByUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -101,7 +102,7 @@ public class ExamController {
         return new ResponseEntity(examUserList, HttpStatus.OK);
 
     }
-
+    // Lấy bài bài thi của 1 user theo kì thi
     @GetMapping(value = "/exams/exam-user/{examId}")
     public ResponseEntity<ExamUser> getExamUserById(@PathVariable Long examId) throws ParseException {
 
@@ -119,7 +120,7 @@ public class ExamController {
 //        }
         return ResponseEntity.ok(examUser.get());
     }
-
+    // Lấy danh sách câu hỏi của 1 bài thi
     @GetMapping(value = "/exams/{examId}/questions")
     public ResponseEntity<ExamQuestionList> getAllQuestions(@PathVariable Long examId) throws IOException {
         String username = userService.getUserName();
@@ -210,7 +211,7 @@ public class ExamController {
         return new ResponseEntity(examQuestionList, HttpStatus.OK);
 
     }
-
+    // Tạo 1 bài thi
     @PostMapping(value = "/exams")
     public ResponseEntity<?> createExam(@Valid @RequestBody Exam exam, @RequestParam Long intakeId, @RequestParam Long partId, @RequestParam boolean isShuffle, boolean locked) {
         try {
@@ -245,7 +246,7 @@ public class ExamController {
         }
     }
 
-
+    // Lấy ra bài thi theo id bài thí
     @GetMapping(value = "/exams/{id}")
     public ResponseEntity<Exam> getExamById(@PathVariable("id") Long id) {
         Optional<Exam> exam = examService.getExamById(id);
@@ -255,7 +256,7 @@ public class ExamController {
         }
         return new ResponseEntity<>(exam.get(), HttpStatus.OK);
     }
-
+    // lưu đáp án bài làm của người dùng trong một kỳ thi
     @PutMapping(value = "/exams/{examId}/questions-by-user")
     public void saveUserExamAnswer(@RequestBody List<AnswerSheet> answerSheets, @PathVariable Long examId, @RequestParam boolean isFinish, @RequestParam int remainingTime) throws JsonProcessingException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -281,7 +282,7 @@ public class ExamController {
 
     }
 
-
+// Trả về kết quả làm bài của tất cả người dùng trong một kỳ thi
     @GetMapping(value = "/exams/{examId}/result/all")
     public ResponseEntity getResultExamAll(@PathVariable Long examId) throws IOException {
         List<ExamResult> examResults = new ArrayList<>();
@@ -334,7 +335,7 @@ public class ExamController {
         }
         return new ResponseEntity(examResults, HttpStatus.OK);
     }
-
+ //  thống kê số lượt trả lời đúng cho từng câu hỏi trong một kỳ thi (examId)
     @GetMapping(value = "/exams/{examId}/result/all/question-report")
     public ResponseEntity getResultExamQuestionsReport(@PathVariable Long examId) throws IOException {
 
@@ -385,7 +386,7 @@ public class ExamController {
         }
         return new ResponseEntity(questionExamReports, HttpStatus.OK);
     }
-
+    // trả về kết quả làm bài (điểm và lựa chọn) của người dùng hiện tại trong một kỳ thi cụ thể (examId).
     @GetMapping(value = "/exams/{examId}/result")
     public ResponseEntity getResultExam(@PathVariable Long examId) throws IOException {
         ExamResult examResult = new ExamResult();
@@ -417,7 +418,7 @@ public class ExamController {
         }
         return new ResponseEntity(examResult, HttpStatus.OK);
     }
-
+    // để lấy kết quả làm bài của một người dùng cụ thể (username) trong một kỳ thi cụ thể (examId). Đây là phiên bản mở rộng hơn so với hàm trước đó (lấy theo người dùng đang đăng nhập), dùng cho mục đích admin hoặc giám thị xem điểm của học viên.
     @GetMapping(value = "/exams/{examId}/users/{username}/result")
     public ResponseEntity getResultExamByUser(@PathVariable Long examId, @PathVariable String username) throws IOException {
         ExamResult examResult = new ExamResult();
@@ -465,7 +466,7 @@ public class ExamController {
         });
         return choiceUsers;
     }
-
+    // lấy danh sách câu hỏi và thông tin chi tiết của từng câu trong một bài thi cụ thể, bao gồm: nội dung câu hỏi, điểm số, độ khó và loại câu hỏi.
     @GetMapping(value = "/exam/{id}/question-text")
     public List<ExamDetail> getQuestionTextByExamId(@PathVariable Long id) throws IOException {
         Optional<Exam> exam = examService.getExamById(id);
@@ -490,7 +491,7 @@ public class ExamController {
         });
         return examQuestionPoints;
     }
-
+    // dùng để trả về danh sách lịch thi của người dùng hiện tại, bao gồm thông tin chi tiết về kỳ thi và trạng thái tham gia kỳ thi đó
     @GetMapping(value = "/exams/schedule")
     public List<ExamCalendar> getExamCalendar() {
         Date now = new Date();
@@ -535,7 +536,7 @@ public class ExamController {
         });
         return examCalendars;
     }
-
+    // hủy 1 kì thi
     @GetMapping(value = "/exams/{id}/cancel")
     public void cancelExam(@PathVariable Long id) {
         String username = userService.getUserName();
