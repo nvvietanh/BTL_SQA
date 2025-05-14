@@ -1,4 +1,4 @@
-package com.thanhtam.backend.service;
+package com.thanhtam.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thanhtam.backend.dto.*;
@@ -30,7 +30,7 @@ import java.util.Optional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class ExamControllerTest {
+public class ExamControllerTestCHINH {
 
     @LocalServerPort
     private int port;
