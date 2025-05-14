@@ -13,7 +13,10 @@ import com.thanhtam.backend.service.QuestionTypeService;
 import com.thanhtam.backend.ultilities.DifficultyLevel;
 import com.thanhtam.backend.ultilities.EQTypeCode;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -58,16 +61,109 @@ public class QuestionControllerTest {
     @Autowired
     private QuestionTypeService questionTypeService;
 
+    private static String adminToken;
+    private static String lecturerToken;
+    private static String studentToken;
+
     private String getRootUrl() {
         return "http://localhost:" + port + "/api";
     }
 
-    private String getToken() {
-        return "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGFuaHRhbTI4c3MiLCJpYXQiOjE3NDQyOTQ4MTIsImV4cCI6MTc0NDM4MTIxMiwicm9sZSI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XX0.dlO69r0W_COp4s0Y1zZ1e4cGUE-56KPuAW5WeebauMCzT0Q8Ct3tXw_flMBuSQuqIRQ4tcy_JNju-wjL5X5F0w";
+    // private String getToken() {
+    //     return "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aGFuaHRhbTI4c3MiLCJpYXQiOjE3NDQyOTQ4MTIsImV4cCI6MTc0NDM4MTIxMiwicm9sZSI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XX0.dlO69r0W_COp4s0Y1zZ1e4cGUE-56KPuAW5WeebauMCzT0Q8Ct3tXw_flMBuSQuqIRQ4tcy_JNju-wjL5X5F0w";
+    // }
+
+//    @BeforeClass
+//    @BeforeAll
+    @Before
+    public void setupToken() throws IOException {
+        // Tạo payload cho API đăng nhập role admin
+        String loginPayloadAdmin = "{ \"username\": \"thanhtam28ss\", \"password\": \"Abcd@12345\" }";
+
+        // Tạo header với Content-Type
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        // Tạo request entity
+        HttpEntity<String> requestAdmin = new HttpEntity<>(loginPayloadAdmin, headers);
+
+        // Gọi API đăng nhập cho admin
+        ResponseEntity<String> responseAdmin = restTemplate.postForEntity(
+                getRootUrl() + "/auth/signin", // Đường dẫn API đăng nhập
+                requestAdmin,
+                String.class
+        );
+
+        // Kiểm tra trạng thái HTTP
+        if (responseAdmin.getStatusCodeValue() != 200) {
+            throw new RuntimeException("Đăng nhập admin thất bại với mã trạng thái: " + responseAdmin.getStatusCodeValue());
+        }
+
+        // Parse token từ response role admin
+        String responseBodyAdmin = responseAdmin.getBody();
+        adminToken = objectMapper.readTree(responseBodyAdmin).get("accessToken").asText();
+
+        // Tạo payload cho API đăng nhập role lecturer
+        String loginPayloadLecturer = "{ \"username\": \"tamht298\", \"password\": \"Abcd@12345\" }";
+        HttpEntity<String> requestLecturer = new HttpEntity<>(loginPayloadLecturer, headers);
+
+        // Gọi API đăng nhập cho lecturer
+        ResponseEntity<String> responseLecturer = restTemplate.postForEntity(
+                getRootUrl() + "/auth/signin",
+                requestLecturer,
+                String.class
+        );
+
+        // Kiểm tra trạng thái HTTP
+        if (responseLecturer.getStatusCodeValue() != 200) {
+            throw new RuntimeException("Đăng nhập lecturer thất bại với mã trạng thái: " + responseLecturer.getStatusCodeValue());
+        }
+
+        // Parse token từ response role lecturer
+        String responseBodyLecturer = responseLecturer.getBody();
+        lecturerToken = objectMapper.readTree(responseBodyLecturer).get("accessToken").asText();
+
+        // Tạo payload cho API đăng nhập role student
+        String loginPayloadStudent = "{ \"username\": \"nvvanh\", \"password\": \"Abcd@12345\" }";
+        HttpEntity<String> requestStudent = new HttpEntity<>(loginPayloadStudent, headers);
+
+        // Gọi API đăng nhập cho student
+        ResponseEntity<String> responseStudent = restTemplate.postForEntity(
+                getRootUrl() + "/auth/signin",
+                requestStudent,
+                String.class
+        );
+
+        // Kiểm tra trạng thái HTTP
+        if (responseStudent.getStatusCodeValue() != 200) {
+            throw new RuntimeException("Đăng nhập student thất bại với mã trạng thái: " + responseStudent.getStatusCodeValue());
+        }
+
+        // Parse token từ response role student
+        String responseBodyStudent = responseStudent.getBody();
+        studentToken = objectMapper.readTree(responseBodyStudent).get("accessToken").asText();
+
+        // In ra token để kiểm tra
+        System.out.println("Admin Token: " + adminToken);
+        System.out.println("Lecturer Token: " + lecturerToken);
+        System.out.println("Student Token: " + studentToken);
+    }
+
+    private String getAdminToken() {
+        return adminToken;
+    }
+    
+    private String getLecturerToken() {
+        return lecturerToken;
+    }
+
+    private String getStudentToken() {
+        return studentToken;
     }
 
     @Test
     public void testGetAllQuestions_Success() throws IOException {
+//        setupToken();
         // Kiểm tra service không null
         Assert.assertNotNull("QuestionService bị null!", questionService);
         
@@ -80,7 +176,7 @@ public class QuestionControllerTest {
 //        );
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + getToken()); // gán token vào header
+        headers.set("Authorization", "Bearer " + getAdminToken());
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -112,7 +208,7 @@ public class QuestionControllerTest {
         Assert.assertNotNull("QuestionService bị null!", questionService);
         
         // Lấy question có id = 1 từ DB
-        Optional<Question> questionOpt = questionService.getQuestionById(1L);
+        Optional<Question> questionOpt = questionService.getQuestionById(8L);
         Assert.assertTrue("Question không tồn tại!", questionOpt.isPresent());
         
         // Gọi API lấy question theo id
@@ -185,6 +281,65 @@ public class QuestionControllerTest {
             objectMapper.getTypeFactory().constructParametricType(Page.class, Question.class));
         Assert.assertNotNull("Page questions không được null!", questions);
         Assert.assertFalse("Page questions không được rỗng!", questions.getContent().isEmpty());
+    }
+
+    /**
+     * TC_QC_01: Kiểm tra API lấy danh sách câu hỏi theo partId
+     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId = 0 (admin)
+     * Input: partId = 0
+     * Kết quả mong đợi: API trả về danh sách câu hỏi của tất cả các part
+     * @throws IOException
+     */
+    @Test
+    public void testGetQuestionsByPart_Admin_AllParts() throws IOException {
+        // Gọi API lấy danh sách questions với partId = 0 (admin)
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + getAdminToken());
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+    
+        ResponseEntity<String> response = restTemplate.exchange(
+                getRootUrl() + "/parts/0/questions",
+                HttpMethod.GET,
+                entity,
+                String.class
+        );
+    
+        // Kiểm tra kết quả
+        Assert.assertEquals(200, response.getStatusCodeValue());
+    
+        // Parse response body
+        PageResult pageResult = objectMapper.readValue(response.getBody(), PageResult.class);
+        Assert.assertNotNull("PageResult không được null!", pageResult);
+    }
+
+    /**
+     * TC_QC_02: Kiểm tra API lấy danh sách câu hỏi theo partId có trong cơ sở dữ liệu
+     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId có trong cơ sở dữ liệu của người dùng là lecturer
+     * Input: partId = 75 và role = LECTURER
+     * Kết quả mong đợi: API trả về danh sách câu hỏi của partId = 75 và người dùng là lecturer
+     * @throws IOException
+     */
+    
+    @Test
+    public void testGetQuestionsByPart_Lecturer_SpecificPart() throws IOException {
+        // Gọi API lấy danh sách questions với partId cụ thể (lecturer)
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + getLecturerToken());
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+    
+        ResponseEntity<String> response = restTemplate.exchange(
+                getRootUrl() + "/parts/75/questions",
+                HttpMethod.GET,
+                entity,
+                String.class
+        );
+    
+        // Kiểm tra kết quả
+        Assert.assertEquals(200, response.getStatusCodeValue());
+    
+        // Parse response body
+        PageResult pageResult = objectMapper.readValue(response.getBody(), PageResult.class);
+        Assert.assertNotNull("PageResult không được null!", pageResult);
     }
 
     @Test
@@ -301,4 +456,41 @@ public class QuestionControllerTest {
         Assert.assertTrue("Question vẫn còn tồn tại!", deletedQuestion.isPresent());
         Assert.assertTrue("Question chưa được đánh dấu là đã xóa!", deletedQuestion.get().isDeleted());
     }
-}
+ }
+// @Test
+// public void testGetQuestionById_ValidId() throws Exception {
+//     // Arrange
+//     Long validId = 1L;
+//     Question mockQuestion = new Question();
+//     mockQuestion.setId(validId);
+//     mockQuestion.setQuestionText("Sample Question");
+//     Mockito.when(questionService.getQuestionById(validId)).thenReturn(Optional.of(mockQuestion));
+
+//     // Act
+//     ResponseEntity<?> response = questionController.getQuestionById(validId);
+
+//     // Assert
+//     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+//     Assert.assertTrue(response.getBody() instanceof Question);
+//     Question returnedQuestion = (Question) response.getBody();
+//     Assert.assertEquals(validId, returnedQuestion.getId());
+//     Assert.assertEquals("Sample Question", returnedQuestion.getQuestionText());
+// }
+
+// @Test
+// public void testGetQuestionById_InvalidId() throws Exception {
+//     // Arrange
+//     Long invalidId = 999L;
+//     Mockito.when(questionService.getQuestionById(invalidId)).thenReturn(Optional.empty());
+
+//     // Act
+//     ResponseEntity<?> response = questionController.getQuestionById(invalidId);
+
+//     // Assert
+//     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+//     Assert.assertTrue(response.getBody() instanceof ServiceResult);
+//     ServiceResult serviceResult = (ServiceResult) response.getBody();
+//     Assert.assertEquals(404, serviceResult.getStatusCode());
+//     Assert.assertEquals("Not found with id: " + invalidId, serviceResult.getMessage());
+//     Assert.assertNull(serviceResult.getData());
+// }
