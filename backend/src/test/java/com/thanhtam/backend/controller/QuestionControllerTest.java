@@ -29,6 +29,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,7 @@ import java.util.Optional;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
+@Rollback
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class QuestionControllerTest {
 
@@ -207,13 +209,16 @@ public class QuestionControllerTest {
         // Kiểm tra service không null
         Assert.assertNotNull("QuestionService bị null!", questionService);
         
-        // Lấy question có id = 1 từ DB
+        // Lấy question có id = 8 từ DB
         Optional<Question> questionOpt = questionService.getQuestionById(8L);
         Assert.assertTrue("Question không tồn tại!", questionOpt.isPresent());
         
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + getAdminToken());
+
         // Gọi API lấy question theo id
         ResponseEntity<String> response = restTemplate.exchange(
-            getRootUrl() + "/questions/1",
+            getRootUrl() + "/questions/8",
             HttpMethod.GET,
             new HttpEntity<>(new HttpHeaders()),
             String.class

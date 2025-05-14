@@ -70,6 +70,8 @@ public class QuestionController {
         boolean isAdmin = user.getRoles().contains(role);
 
         Page<Question> questions;
+        // Nếu partId = 0 thì lấy tất cả câu hỏi mà người dùng đã tạo
+        // Nếu là admin thì lấy tất cả câu hỏi
         if (partId == 0) {
             if(isAdmin){
                 questions = questionService.findAllQuestions(pageable);
@@ -80,6 +82,7 @@ public class QuestionController {
 
         }
 
+        // Nếu partId != 0 và là admin thì lấy tất cả câu hỏi của partId
         if (isAdmin) {
             Part part = partService.findPartById(partId).get();
             questions = questionService.findQuestionsByPart(pageable, part);
