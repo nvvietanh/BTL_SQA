@@ -1,0 +1,10 @@
+ID,Class,Method,Mục tiêu kiểm thử,Input,Output kỳ vọng,Ghi chú
+TC_QT_01,QuestionTypeServiceImpl,getQuestionTypeById,Kiểm tra phương thức getQuestionTypeById trả về loại câu hỏi khi ID tồn tại,ID = 1L (tồn tại trong DB),Optional<QuestionType> có giá trị,-
+TC_QT_02,QuestionTypeServiceImpl,getQuestionTypeById,Kiểm tra phương thức getQuestionTypeById trả về Optional.empty() khi ID không tồn tại,ID = 999999L (không tồn tại trong DB),Optional.empty(),-
+TC_QT_03,QuestionTypeServiceImpl,getQuestionTypeByCode,Kiểm tra phương thức getQuestionTypeByCode trả về loại câu hỏi khi code tồn tại,code = EQTypeCode.MC,Optional<QuestionType> có giá trị,-
+TC_QT_04,QuestionTypeServiceImpl,getQuestionTypeByCode,Kiểm tra phương thức getQuestionTypeByCode trả về Optional.empty() khi code không tồn tại,code = EQTypeCode.valueOf("INVALID_CODE"),Optional.empty(),-
+TC_QT_05,QuestionTypeServiceImpl,getQuestionTypeList,Kiểm tra phương thức getQuestionTypeList trả về danh sách tất cả loại câu hỏi,Không có,List<QuestionType> chứa tất cả loại câu hỏi,-
+TC_QT_06,QuestionTypeServiceImpl,saveQuestionType,Kiểm tra phương thức saveQuestionType lưu loại câu hỏi mới,QuestionType mới với typeCode = EQTypeCode.MC,QuestionType được lưu vào DB,-
+TC_QT_07,QuestionTypeServiceImpl,delete,Kiểm tra phương thức delete xóa loại câu hỏi,ID = 1L,Loại câu hỏi bị xóa khỏi DB,-
+TC_QT_08,QuestionTypeServiceImpl,existsById,Kiểm tra phương thức existsById trả về true khi ID tồn tại,ID = 1L (tồn tại trong DB),true,-
+TC_QT_09,QuestionTypeServiceImpl,existsById,Kiểm tra phương thức existsById trả về false khi ID không tồn tại,ID = 999999L (không tồn tại trong DB),false,- 
