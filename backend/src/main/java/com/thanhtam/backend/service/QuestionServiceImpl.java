@@ -52,6 +52,8 @@ public class QuestionServiceImpl implements QuestionService {
         return questions;
     }
 
+    // Chuyển list Question thành list AnswerSheet.
+    // 
     @Override
     public List<AnswerSheet> convertFromQuestionList(List<Question> questionList) {
         List<AnswerSheet> answerSheets = new ArrayList<>();

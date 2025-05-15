@@ -21,8 +21,8 @@ import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Transactional
-@Rollback
+//@Transactional
+//@Rollback
 public class PartServiceImplTest {
 
     @Autowired
@@ -143,6 +143,9 @@ public class PartServiceImplTest {
     // Mục tiêu: Kiểm tra phương thức savePart lưu ko thành công do course ko tồn tại
     // INPUT: part(name: "Valid Name",Course(999999L))
     // OUTPUT Kỳ vọng: ném ra Exception ngoại lệ
+
+    @Transactional
+    @Rollback
     @Test(expected = Exception.class)
     public void testSavePart_Fail_CourseNotExist() {
         Course fakeCourse = new Course();

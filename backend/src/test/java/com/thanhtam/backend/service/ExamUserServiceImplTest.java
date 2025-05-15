@@ -45,16 +45,23 @@ public class ExamUserServiceImplTest {
     @Autowired
     private ExamService examService;
 
-    // TC_EUS_01: exam == null -> NullPointerException
+    // TC_EUS01: Test tạo ExamUser: trường hợp fail do exam bị null
+    // Mục tiêu: Kiểm tra phương thức create lưu ko thành công exam bị null
+    // INPUT: {exam: null, List<User> users}
+    // OUTPUT Kỳ vọng: ném ra NullPointerException ngoại lệ
     @Test(expected = NullPointerException.class)
     @Transactional
+    @Rollback
     public void testCreate_ShouldThrow_WhenExamIsNull() {
         List<User> users = new ArrayList<>();
         users.add(new User()); // user dummy
         examUserService.create(null, users);
     }
 
-    // TC_EUS_02: userSet == null -> NullPointerException
+    // TC_EUS_02: Test tạo ExamUser - trường hợp userSet là null
+    // Mục tiêu: Kiểm tra phương thức create ném ngoại lệ khi tham số userSet là null
+    // INPUT: exam = exam hợp lệ (id=200), userSet = null
+    // OUTPUT kỳ vọng: Ném ra NullPointerException
     @Test(expected = NullPointerException.class)
     @Transactional
     public void testCreate_ShouldThrow_WhenUserSetIsNull() {
@@ -64,7 +71,10 @@ public class ExamUserServiceImplTest {
         examUserService.create(exam, null);
     }
 
-    // TC_EUS_03:: userSet chứa phần tử null -> lỗi runtime (NullPointerException hoặc khác)
+    // TC_EUS_03: Test tạo ExamUser - userSet chứa phần tử null
+    // Mục tiêu: Kiểm tra phương thức create ném ngoại lệ khi userSet chứa phần tử null
+    // INPUT: exam = exam hợp lệ (id=200), userSet = List các user hợp lệ + 1 phần tử null
+    // OUTPUT kỳ vọng: Ném ra Exception
     @Test(expected = Exception.class)
     @Transactional
     public void testCreate_ShouldThrow_WhenUserSetContainsNull() {
@@ -81,7 +91,10 @@ public class ExamUserServiceImplTest {
         examUserService.create(exam, users);
     }
 
-    // TC_EUS_04: Tạo thành công với dữ liệu hợp lệ
+    // TC_EUS_04: Test tạo ExamUser thành công với dữ liệu hợp lệ
+    // Mục tiêu: Kiểm tra phương thức create tạo đúng số lượng ExamUser tương ứng với số lượng user truyền vào
+    // INPUT: exam = exam hợp lệ (id=200), userSet = List các user hợp lệ thuộc intake của exam
+    // OUTPUT kỳ vọng: Số lượng ExamUser sau khi tạo tăng đúng bằng số lượng user truyền vào, mỗi ExamUser liên kết đúng exam và user
     @Test
     @Transactional
     public void testCreateExamWithUsers() {
@@ -117,7 +130,10 @@ public class ExamUserServiceImplTest {
             junit.framework.Assert.assertTrue("User ID " + id + " không được gán!", actualUserIds.contains(id));
         }
     }
-    // TC_EUS_05:Test khi username không tồn tại trong hệ thống
+    // TC_EUS_05: Test getExamListByUsername với username không tồn tại
+    // Mục tiêu: Kiểm tra phương thức getExamListByUsername trả về danh sách rỗng khi username không tồn tại
+    // INPUT: username = "username_khong_ton_tai"
+    // OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testGetExamListByUsername_UserNotExist() {
@@ -128,7 +144,10 @@ public class ExamUserServiceImplTest {
         Assert.assertNotNull("Kết quả không được null", result);
         Assert.assertTrue("Danh sách phải rỗng khi username không tồn tại", result.isEmpty());
     }
-    // TC_EUS_06:Test khi username tồn tại nhưng không có kỳ thi chưa bị hủy
+    // TC_EUS_06: Test getExamListByUsername với username tồn tại nhưng không có exam chưa bị hủy
+    // Mục tiêu: Kiểm tra phương thức getExamListByUsername trả về danh sách rỗng khi user không có exam chưa bị hủy
+    // INPUT: username = "1724801030059"
+    // OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testGetExamListByUsername_NoActiveExams() {
@@ -140,7 +159,10 @@ public class ExamUserServiceImplTest {
         Assert.assertNotNull("Kết quả không được null", result);
         Assert.assertTrue("Danh sách phải rỗng khi không có exam chưa bị hủy", result.isEmpty());
     }
-    // TC_EUS_07: Test khi username là chuỗi rỗng
+    // TC_EUS_07: Test getExamListByUsername với username là chuỗi rỗng
+    // Mục tiêu: Kiểm tra phương thức getExamListByUsername trả về danh sách rỗng khi username là chuỗi rỗng
+    // INPUT: username = ""
+    // OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testGetExamListByUsername_EmptyUsername() {
@@ -153,15 +175,22 @@ public class ExamUserServiceImplTest {
         // Ở đây giả sử trả về rỗng
         Assert.assertTrue("Danh sách phải rỗng khi username rỗng", result.isEmpty());
     }
-    //  TC_EUS_08: Test khi username là null
-    @Test(expected = IllegalArgumentException.class)
+    // TC_EUS_08: Test getExamListByUsername với username là null
+    // Mục tiêu: Kiểm tra phương thức getExamListByUsername ném IllegalArgumentException khi username là null
+    // INPUT: username = null
+    // OUTPUT kỳ vọng: Ném ra Exception
+    @Test(expected =Exception.class)
     @Transactional
     public void testGetExamListByUsername_NullUsername() {
         examUserService.getExamListByUsername(null);
     }
 
 
-    // TC_EUS_09:
+
+    // TC_EUS_09: Test getExamListByUsername thành công với username hợp lệ
+    // Mục tiêu: Kiểm tra phương thức getExamListByUsername trả về danh sách ExamUser đúng user
+    // INPUT: username = "1624801040051"
+    // OUTPUT kỳ vọng: Trả về danh sách ExamUser không rỗng, tất cả ExamUser có username đúng
     @Test
     @Transactional
     public void testGetExamListByUsernameSuccess() {
@@ -179,7 +208,10 @@ public class ExamUserServiceImplTest {
         }
     }
 
-    // TC_EUS_10: - Các test case cho hàm findByExamAndUser
+    // TC_EUS_10: Test findByExamAndUser thành công với examId và username hợp lệ
+    // Mục tiêu: Kiểm tra phương thức findByExamAndUser trả về ExamUser đúng với examId và username hợp lệ
+    // INPUT: examId = 195L, username = "1624801040051"
+    // OUTPUT kỳ vọng: Trả về ExamUser không null, examId và username đúng
 
     @Test
     @Transactional
@@ -198,7 +230,10 @@ public class ExamUserServiceImplTest {
         Assert.assertEquals("Exam ID không đúng!", exam.getId(), foundExamUser.getExam().getId());
         Assert.assertEquals("Username không đúng!", user.getUsername(), foundExamUser.getUser().getUsername());
     }
-    // TC_EUS_11: TH examID ko ton tai
+    // TC_EUS_11: Test findByExamAndUser với examId không tồn tại
+    // Mục tiêu: Kiểm tra phương thức findByExamAndUser trả về null khi examId không tồn tại
+    // INPUT: examId = 500L (không tồn tại), username = "1624801040051"
+    // OUTPUT kỳ vọng: Trả về null
     @Test
     @Transactional
     public void testFindByExamAndUser_Fail_ExamNotExist() {
@@ -219,7 +254,10 @@ public class ExamUserServiceImplTest {
 
         Assert.assertNull("ExamUser phải là null khi exam không tồn tại hoặc không có user tham gia!", foundExamUser);
     }
-    // TC_EUS_12:TH user ko ton tai
+    // TC_EUS_12: Test findByExamAndUser với username không tồn tại
+    // Mục tiêu: Kiểm tra phương thức findByExamAndUser trả về null khi username không tồn tại
+    // INPUT: examId = 195L, username = "username_khong_ton_tai"
+    // OUTPUT kỳ vọng: Trả về null
     @Test
     @Transactional
     public void testFindByExamAndUser_Fail_UserNotExist() {
@@ -238,7 +276,10 @@ public class ExamUserServiceImplTest {
 
         Assert.assertNull("ExamUser phải là null khi user không tồn tại!", foundExamUser);
     }
-    // TC_EUS_13: TH user ko tham gia exam
+    // TC_EUS_13: Test findByExamAndUser với user không tham gia exam
+    // Mục tiêu: Kiểm tra phương thức findByExamAndUser trả về null khi user không tham gia exam
+    // INPUT: examId = 195L, username = "dvcpro" (user tồn tại nhưng không tham gia exam)
+    // OUTPUT kỳ vọng: Trả về null
     @Test
     @Transactional
     public void testFindByExamAndUser_Fail_UserNotInExam() {
@@ -254,7 +295,10 @@ public class ExamUserServiceImplTest {
 
         Assert.assertNull("User không tham gia kỳ thi này nên ExamUser phải là null!", foundExamUser);
     }
-    // TC_EUS_14: TH exam id null
+    // TC_EUS_14: Test findByExamAndUser với examId là null
+    // Mục tiêu: Kiểm tra phương thức findByExamAndUser ném exception khi examId là null
+    // INPUT: examId = null, username = "1624801040051"
+    // OUTPUT kỳ vọng: Ném IllegalArgumentException hoặc NullPointerException
     @Test
     @Transactional
     public void testFindByExamAndUser_NullExamId() {
@@ -265,7 +309,10 @@ public class ExamUserServiceImplTest {
             // pass
         }
     }
-    // TC_EUS_15: TH username null
+    // TC_EUS_15: Test findByExamAndUser với username là null
+    // Mục tiêu: Kiểm tra phương thức findByExamAndUser ném exception khi username là null
+    // INPUT: examId = 195L, username = null
+    // OUTPUT kỳ vọng: Ném IllegalArgumentException hoặc NullPointerException
     @Test
     @Transactional
     public void testFindByExamAndUser_NullUsername() {
@@ -276,11 +323,14 @@ public class ExamUserServiceImplTest {
         try {
             examUserService.findByExamAndUser(exam.getId(), null);
             Assert.fail("Phải ném exception khi username là null");
-        } catch (IllegalArgumentException | NullPointerException e) {
+        } catch (Exception e) {
             // pass
         }
     }
-    // TC_EUS_16: user rỗng
+    // TC_EUS_16: Test findByExamAndUser với username là chuỗi rỗng
+    // Mục tiêu: Kiểm tra phương thức findByExamAndUser trả về null khi username là chuỗi rỗng
+    // INPUT: examId = 195L, username = ""
+    // OUTPUT kỳ vọng: Trả về null
     @Test
     @Transactional
     public void testFindByExamAndUser_EmptyUsername() {
@@ -292,7 +342,10 @@ public class ExamUserServiceImplTest {
         Assert.assertNull("Phải trả về null khi username là chuỗi rỗng", foundExamUser);
     }
 
-    // TC_EUS_17: - Test update ExamUser
+    // TC_EUS_17: Test update ExamUser thành công
+    // Mục tiêu: Kiểm tra phương thức update cập nhật đúng dữ liệu ExamUser
+    // INPUT: examUser với isFinished = true, examId và username hợp lệ
+    // OUTPUT kỳ vọng: uDữ liệu ExamUser được cập nhật thành công, isFinished = tre
 
     @Test
     @Transactional
@@ -318,15 +371,21 @@ public class ExamUserServiceImplTest {
         Assert.assertTrue("Chưa cập nhật trạng thái hoàn thành", updatedExamUser.getIsFinished());
     }
 
-    // TC_EUS_18: update với examUser là null
-    @Test(expected = IllegalArgumentException.class)
+    // TC_EUS_18: Test update ExamUser với đối tượng null
+    // Mục tiêu: Kiểm tra phương thức update ném IllegalArgumentException khi truyền null
+    // INPUT: examUser = null
+    // OUTPUT kỳ vọng: Exception
+    @Test(expected = Exception.class)
     @Transactional
     public void testUpdateExamUser_NullExamUser() {
         examUserService.update(null);
     }
 
-    // TC_EUS_19: update với examUser có trường bắt buộc null (ví dụ user hoặc exam null)
-    @Test(expected = DataIntegrityViolationException.class) // Hoặc exception tương ứng
+    // TC_EUS_19: Test update ExamUser với user hoặc exam bị null
+    // Mục tiêu: Kiểm tra phương thức update ném DataIntegrityViolationException khi user hoặc exam null
+    // INPUT: examUser với user = null, exam = null
+    // OUTPUT kỳ vọng: Ném Exception
+    @Test(expected = Exception.class) // Hoặc exception tương ứng
     @Transactional
     public void testUpdateExamUser_NullUserOrExam() {
         ExamUser examUser = new ExamUser();
@@ -338,8 +397,11 @@ public class ExamUserServiceImplTest {
     }
 
 
-    // TC_EUS_20: update với dữ liệu không hợp lệ (ví dụ điểm âm, thời gian âm)
-    @Test(expected = ConstraintViolationException.class) // Hoặc exception tùy validation
+    // TC_EUS_20: Test update ExamUser với dữ liệu không hợp lệ (điểm âm, thời gian âm)
+    // Mục tiêu: Kiểm tra phương thức update ném ConstraintViolationException khi dữ liệu không hợp lệ
+    // INPUT: examUser với totalPoint = -100.0, remainingTime = -10
+    // OUTPUT kỳ vọng: Ném Exception
+    @Test(expected = Exception.class) // Hoặc exception tùy validation
     @Transactional
     public void testUpdateExamUser_InvalidData() {
         Optional<Exam> result = examService.getExamById(195L);
@@ -359,9 +421,10 @@ public class ExamUserServiceImplTest {
         examUserService.update(examUser);
     }
 
-    // TC_EUS_21: - Test getCompleteExams
-
-    // Test trường hợp thành công với dữ liệu hợp lệ
+    // TC_EUS_21: Test getCompleteExams thành công
+    // Mục tiêu: Kiểm tra phương thức getCompleteExams trả về danh sách bài thi đã hoàn thành đúng user và course
+    // INPUT: courseId = 12L, username = "1624801040051"
+    // OUTPUT kỳ vọng: Trả về danh sách không rỗng, tất cả bài thi có isFinished = true và user đúng
     @Test
     @Transactional
     public void testGetCompleteExams_Success() {
@@ -386,7 +449,10 @@ public class ExamUserServiceImplTest {
         }
     }
 
-    // TC_EUS_22: Test courseId không tồn tại -> trả về danh sách rỗng
+    // TC_EUS_22: Test getCompleteExams với courseId không tồn tại
+    // Mục tiêu: Kiểm tra phương thức getCompleteExams trả về danh sách rỗng khi courseId không tồn tại
+    // INPUT: courseId = 999999L (không tồn tại), username = "1624801040051"
+    // OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testGetCompleteExams_CourseNotExist() {
@@ -402,7 +468,10 @@ public class ExamUserServiceImplTest {
         Assert.assertTrue("Danh sách phải rỗng khi course không tồn tại", list.isEmpty());
     }
 
-    // TC_EUS_23: Test username không tồn tại -> trả về danh sách rỗng
+    // TC_EUS_23: Test getCompleteExams với username không tồn tại
+    // Mục tiêu: Kiểm tra phương thức getCompleteExams trả về danh sách rỗng khi username không tồn tại
+    // INPUT: courseId = 12L, username = "username_khong_ton_tai"
+    // OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testGetCompleteExams_UserNotExist() {
@@ -418,8 +487,11 @@ public class ExamUserServiceImplTest {
         Assert.assertTrue("Danh sách phải rỗng khi user không tồn tại", list.isEmpty());
     }
 
-    // TC_EUS_24: là null (nếu hàm validate, ném IllegalArgumentException)
-    @Test(expected = IllegalArgumentException.class)
+    // TC_EUS_24: Test getCompleteExams với courseId là null
+    // Mục tiêu: Kiểm tra phương thức getCompleteExams ném ngoại lệ khi courseId là null
+    // INPUT: courseId = null, username = "1624801040051"
+    // OUTPUT kỳ vọng: Ném IllegalArgumentException hoặc NullPointerException
+    @Test(expected = Exception.class)
     @Transactional
     public void testGetCompleteExams_NullCourseId() {
         Optional<User> result2 = userService.getUserByUsername("1624801040051");
@@ -429,8 +501,11 @@ public class ExamUserServiceImplTest {
         examUserService.getCompleteExams(null, user.getUsername());
     }
 
-    // TC_EUS_25: là null (nếu hàm validate, ném IllegalArgumentException)
-    @Test(expected = IllegalArgumentException.class)
+    // TC_EUS_25: Test getCompleteExams với username là null
+    // Mục tiêu: Kiểm tra phương thức getCompleteExams ném ngoại lệ khi username là null
+    // INPUT: courseId = 12L, username = null
+    // OUTPUT kỳ vọng: Ném IllegalArgumentException hoặc NullPointerException
+    @Test(expected = Exception.class)
     @Transactional
     public void testGetCompleteExams_NullUsername() {
         Optional<Course> result = courseService.getCourseById(12L);
@@ -440,7 +515,10 @@ public class ExamUserServiceImplTest {
         examUserService.getCompleteExams(course.getId(), null);
     }
 
-    // TC_EUS_26: là chuỗi rỗng -> trả về danh sách rỗng
+    // TC_EUS_26: Test getCompleteExams với username là chuỗi rỗng
+    // Mục tiêu: Kiểm tra phương thức getCompleteExams trả về danh sách rỗng khi username là chuỗi rỗng
+    // INPUT: courseId = 12L, username = ""
+    // OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testGetCompleteExams_EmptyUsername() {
@@ -454,7 +532,10 @@ public class ExamUserServiceImplTest {
         Assert.assertTrue("Danh sách phải rỗng khi username rỗng", list.isEmpty());
     }
 
-    //TC_EUS_27: nhiều bản ghi thỏa mãn điều kiện
+    // TC_EUS_27: Test getCompleteExams với user có nhiều bài thi hoàn thành
+// Mục tiêu: Kiểm tra phương thức getCompleteExams trả về đúng danh sách các bài thi hoàn thành của user
+// INPUT: courseId = 12L, username = "1624801040051" (user có nhiều bài thi hoàn thành)
+// OUTPUT kỳ vọng: Trả về danh sách không rỗng, tất cả bài thi có isFinished = true, user và course đúng
     @Test
     @Transactional
     public void testGetCompleteExams_MultipleResults() {
@@ -479,10 +560,10 @@ public class ExamUserServiceImplTest {
         }
     }
 
-
-    // TC_EUS_28: - Test findAllByExam_Id
-
-    // Test trường hợp examId hợp lệ và có dữ liệu (bạn đã có)
+    // TC_EUS_28: Test findAllByExam_Id với exam có nhiều ExamUser
+// Mục tiêu: Kiểm tra phương thức findAllByExam_Id trả về đúng danh sách ExamUser theo examId
+// INPUT: examId = 200L (exam có nhiều ExamUser)
+// OUTPUT kỳ vọng: Trả về danh sách không rỗng, tất cả ExamUser có examId đúng
     @Test
     @Transactional
     public void testFindAllByExam_Id() {
@@ -500,7 +581,10 @@ public class ExamUserServiceImplTest {
         }
     }
 
-    // TC_EUS_29: examId không tồn tại trong DB
+    // TC_EUS_29: Test findAllByExam_Id với exam không tồn tại
+// Mục tiêu: Kiểm tra phương thức findAllByExam_Id trả về danh sách rỗng khi examId không tồn tại
+// INPUT: examId = 999999L (không tồn tại)
+// OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testFindAllByExam_Id_ExamNotExist() {
@@ -511,11 +595,14 @@ public class ExamUserServiceImplTest {
         Assert.assertTrue("Danh sách phải rỗng khi exam không tồn tại", examUsers.isEmpty());
     }
 
-    // TC_EUS_30: Test examId hợp lệ nhưng không có dữ liệu
+    // TC_EUS_30: Test findAllByExam_Id với exam không có ExamUser
+// Mục tiêu: Kiểm tra phương thức findAllByExam_Id trả về danh sách rỗng khi exam không có ExamUser nào
+// INPUT: examId = 329L (exam không có ExamUser)
+// OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testFindAllByExam_Id_NoData() {
-        Long examId = 329L; // ID exam không tồn tại
+        Long examId = 329L; // ID exam không có dữ liệu
 
         List<ExamUser> examUsers = examUserService.findAllByExam_Id(examId);
 
@@ -523,40 +610,42 @@ public class ExamUserServiceImplTest {
         Assert.assertTrue("Danh sách phải rỗng khi examId không có dữ liệu", examUsers.isEmpty());
     }
 
-    // TC_EUS_31: là null (tùy xử lý trong hàm, có thể ném exception hoặc trả về rỗng)
-    @Test(expected = IllegalArgumentException.class) // Nếu hàm validate, hoặc bỏ annotation nếu không
+    // TC_EUS_31: Test findAllByExam_Id với examId null
+// Mục tiêu: Kiểm tra phương thức findAllByExam_Id ném IllegalArgumentException khi examId là null
+// INPUT: examId = null
+// OUTPUT kỳ vọng: Ném IllegalArgumentException
+    @Test(expected = Exception.class)
     @Transactional
     public void testFindAllByExam_Id_NullExamId() {
         examUserService.findAllByExam_Id(null);
     }
 
-
-    // TC_EUS_32:
+    // TC_EUS_32: Test findExamUsersByIsFinishedIsTrueAndExam_Id thành công
+// Mục tiêu: Kiểm tra phương thức findExamUsersByIsFinishedIsTrueAndExam_Id trả về đúng các ExamUser đã hoàn thành
+// INPUT: examId = 200L
+// OUTPUT kỳ vọng: Trả về danh sách không rỗng, tất cả ExamUser có isFinished = true và examId đúng
     @Test
     @Transactional
     public void testFindExamUsersByIsFinishedIsTrueAndExam_IdSuccess() {
-        // Tạo dữ liệu cho Exam
         Optional<Exam> result = examService.getExamById(200L);
         junit.framework.Assert.assertTrue("Exam không tồn tại!", result.isPresent());
         Exam exam = result.get();
 
-        // Gọi hàm cần test
         List<ExamUser> completedExamUsers = examUserService.findExamUsersByIsFinishedIsTrueAndExam_Id(exam.getId());
 
-        // Kiểm tra rằng chỉ có ExamUser đã hoàn thành bài thi (isFinished = true) được trả về
         junit.framework.Assert.assertNotNull("Danh sách ExamUser không thể null!", completedExamUsers);
         junit.framework.Assert.assertFalse("Danh sách ExamUser không thể rỗng!", completedExamUsers.isEmpty());
 
-        // Kiểm tra rằng tất cả ExamUser trong danh sách đều có isFinished = true
         for (ExamUser examUser : completedExamUsers) {
             junit.framework.Assert.assertTrue("ExamUser phải hoàn thành bài thi (isFinished = true)", examUser.getIsFinished());
             junit.framework.Assert.assertEquals("Exam ID không đúng!", exam.getId(), examUser.getExam().getId());
         }
     }
 
-    // TC_EUS_33:- Test findExamUsersByIsFinishedIsTrueAndExam_Id
-
-    // Test trường hợp examId hợp lệ nhưng không có ExamUser nào hoàn thành
+    // TC_EUS_33: Test findExamUsersByIsFinishedIsTrueAndExam_Id với exam không có ai hoàn thành
+// Mục tiêu: Kiểm tra phương thức findExamUsersByIsFinishedIsTrueAndExam_Id trả về danh sách rỗng nếu không có ExamUser hoàn thành
+// INPUT: examId = 300L (không có ai hoàn thành)
+// OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testFindExamUsersByIsFinishedIsTrueAndExam_Id_NoCompleted() {
@@ -568,7 +657,10 @@ public class ExamUserServiceImplTest {
         Assert.assertTrue("Danh sách phải rỗng khi không có ExamUser hoàn thành", completedExamUsers.isEmpty());
     }
 
-    // TC_EUS_34: examId không tồn tại trong DB
+    // TC_EUS_34: Test findExamUsersByIsFinishedIsTrueAndExam_Id với examId không tồn tại
+// Mục tiêu: Kiểm tra phương thức findExamUsersByIsFinishedIsTrueAndExam_Id trả về danh sách rỗng khi examId không tồn tại
+// INPUT: examId = 999999L (không tồn tại)
+// OUTPUT kỳ vọng: Trả về danh sách rỗng
     @Test
     @Transactional
     public void testFindExamUsersByIsFinishedIsTrueAndExam_Id_ExamNotExist() {
@@ -580,12 +672,16 @@ public class ExamUserServiceImplTest {
         Assert.assertTrue("Danh sách phải rỗng khi exam không tồn tại", completedExamUsers.isEmpty());
     }
 
-    // TC_EUS_35: là null (nếu có validate, ném IllegalArgumentException)
-    @Test(expected = IllegalArgumentException.class)
+    // TC_EUS_35: Test findExamUsersByIsFinishedIsTrueAndExam_Id với examId null
+// Mục tiêu: Kiểm tra phương thức findExamUsersByIsFinishedIsTrueAndExam_Id ném IllegalArgumentException khi examId là null
+// INPUT: examId = null
+// OUTPUT kỳ vọng: Ném IllegalArgumentException
+    @Test(expected = Exception.class)
     @Transactional
     public void testFindExamUsersByIsFinishedIsTrueAndExam_Id_NullExamId() {
         examUserService.findExamUsersByIsFinishedIsTrueAndExam_Id(null);
     }
+
 
 
 

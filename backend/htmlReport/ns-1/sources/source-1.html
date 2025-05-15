@@ -1,0 +1,250 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > AuthenticationController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.thanhtam.backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthenticationController (com.thanhtam.backend.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthenticationController</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11.4%
+  </span>
+  <span class="absValue">
+    (5/44)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AuthenticationController$$EnhancerBySpringCGLIB$$5a016212</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11.4%
+  </span>
+  <span class="absValue">
+    (5/44)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.thanhtam.backend.controller;
+&nbsp;
+&nbsp;import com.thanhtam.backend.config.JwtUtils;
+&nbsp;import com.thanhtam.backend.dto.LoginUser;
+&nbsp;import com.thanhtam.backend.dto.OperationStatusDto;
+&nbsp;import com.thanhtam.backend.dto.PasswordResetDto;
+&nbsp;import com.thanhtam.backend.dto.PasswordResetRequest;
+&nbsp;import com.thanhtam.backend.entity.User;
+&nbsp;import com.thanhtam.backend.exception.ErrorMessage;
+&nbsp;import com.thanhtam.backend.payload.response.JwtResponse;
+&nbsp;import com.thanhtam.backend.service.UserDetailsImpl;
+&nbsp;import com.thanhtam.backend.service.UserService;
+&nbsp;import com.thanhtam.backend.ultilities.RequestOperationName;
+&nbsp;import com.thanhtam.backend.ultilities.RequestOperationStatus;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.authentication.AuthenticationManager;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import javax.mail.MessagingException;
+&nbsp;import javax.transaction.Transactional;
+&nbsp;import javax.validation.Valid;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@CrossOrigin(origins = &quot;*&quot;, maxAge = 3600)
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/auth&quot;)
+&nbsp;public class AuthenticationController {
+&nbsp;
+<b class="fc">&nbsp;    private Logger logger = LoggerFactory.getLogger(AuthenticationController.class);</b>
+&nbsp;
+&nbsp;    JwtUtils jwtUtils;
+&nbsp;
+&nbsp;    private AuthenticationManager authenticationManager;
+&nbsp;
+&nbsp;    private UserService userService;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public AuthenticationController(JwtUtils jwtUtils, AuthenticationManager authenticationManager, UserService userService) {</b>
+<b class="fc">&nbsp;        this.jwtUtils = jwtUtils;</b>
+<b class="fc">&nbsp;        this.authenticationManager = authenticationManager;</b>
+<b class="fc">&nbsp;        this.userService = userService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/signin&quot;)
+&nbsp;    @Transactional
+&nbsp;    public ResponseEntity&lt;?&gt; authenticateUser(@Valid @RequestBody LoginUser loginUser) {
+&nbsp;
+<b class="nc">&nbsp;        String username = loginUser.getUsername();</b>
+<b class="nc">&nbsp;        Optional&lt;User&gt; user= userService.getUserByUsername(username);</b>
+<b class="nc">&nbsp;        if(!user.isPresent()){</b>
+<b class="nc">&nbsp;            return ResponseEntity.badRequest().build();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        else if(user.get().isDeleted()==true){</b>
+<b class="nc">&nbsp;            return ResponseEntity.badRequest().build();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Authentication authentication = authenticationManager.authenticate(</b>
+<b class="nc">&nbsp;                new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword()));</b>
+&nbsp;
+<b class="nc">&nbsp;        SecurityContextHolder.getContext().setAuthentication(authentication);</b>
+<b class="nc">&nbsp;        String jwt = jwtUtils.generateJwtToken(authentication);</b>
+&nbsp;
+<b class="nc">&nbsp;        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();</b>
+<b class="nc">&nbsp;        List&lt;String&gt; roles = userDetails.getAuthorities().stream()</b>
+<b class="nc">&nbsp;                .map(item -&gt; item.getAuthority())</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        User userLog = userService.getUserByUsername(userDetails.getUsername()).get();</b>
+<b class="nc">&nbsp;        userLog.setLastLoginDate(new Date());</b>
+<b class="nc">&nbsp;        userService.updateUser(userLog);</b>
+<b class="nc">&nbsp;        logger.warn(userLog.toString());</b>
+<b class="nc">&nbsp;        if (userLog.isDeleted() == true) {</b>
+<b class="nc">&nbsp;            return ResponseEntity.badRequest().build();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return ResponseEntity.ok(new JwtResponse(jwt,</b>
+<b class="nc">&nbsp;                userDetails.getId(),</b>
+<b class="nc">&nbsp;                userDetails.getUsername(),</b>
+<b class="nc">&nbsp;                userDetails.getEmail(),</b>
+<b class="nc">&nbsp;                roles));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @PostMapping(value = &quot;/password-reset-request&quot;)
+&nbsp;    public OperationStatusDto resetPasswordRequest(@RequestBody PasswordResetRequest passwordResetRequest) throws MessagingException {
+<b class="nc">&nbsp;        OperationStatusDto operationStatusDto = new OperationStatusDto();</b>
+<b class="nc">&nbsp;        boolean operationResult = userService.requestPasswordReset(passwordResetRequest.getEmail());</b>
+<b class="nc">&nbsp;        operationStatusDto.setOperationName(RequestOperationName.REQUEST_PASSWORD_RESET.name());</b>
+<b class="nc">&nbsp;        operationStatusDto.setOperationResult(RequestOperationStatus.ERROR.name());</b>
+<b class="nc">&nbsp;        if (operationResult) {</b>
+<b class="nc">&nbsp;            operationStatusDto.setOperationResult(RequestOperationStatus.SUCCESS.name());</b>
+&nbsp;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return operationStatusDto;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(value = &quot;/password-reset&quot;)
+&nbsp;    public OperationStatusDto resetPassword(@RequestBody PasswordResetDto passwordResetDto) {
+<b class="nc">&nbsp;        OperationStatusDto operationStatusDto = new OperationStatusDto();</b>
+<b class="nc">&nbsp;        boolean operationResult = userService.resetPassword(passwordResetDto.getToken(), passwordResetDto.getPassword());</b>
+<b class="nc">&nbsp;        operationStatusDto.setOperationResult(RequestOperationStatus.ERROR.name());</b>
+<b class="nc">&nbsp;        operationStatusDto.setOperationName(RequestOperationName.PASSWORD_RESET.name());</b>
+<b class="nc">&nbsp;        if (operationResult) {</b>
+<b class="nc">&nbsp;            operationStatusDto.setOperationResult(RequestOperationStatus.SUCCESS.name());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return operationStatusDto;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-05-15 11:25</div>
+</div>
+</body>
+</html>

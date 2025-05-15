@@ -154,6 +154,7 @@ private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     }
 
     @Override
+    // @Rollback
     public boolean resetPassword(String token, String password) {
         boolean returnValue = false;
         logger.error(token);
