@@ -29,6 +29,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping(value = "/api")
 @Slf4j
+
 public class CourseController {
     private CourseService courseService;
     private S3Services s3Services;
@@ -138,6 +139,5 @@ public class CourseController {
     public List<Course> findAllByIntakeId(@PathVariable Long intakeId) {
         return courseService.findAllByIntakeId(intakeId);
     }
-
 
 }

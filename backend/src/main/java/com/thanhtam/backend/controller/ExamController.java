@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,7 +43,7 @@ public class ExamController {
     private IntakeService intakeService;
     private PartService partService;
     private ExamUserService examUserService;
-    private ObjectMapper mapper;
+    public ObjectMapper mapper;
 
     @Autowired
     public ExamController(ExamService examService, QuestionService questionService, UserService userService, IntakeService intakeService, PartService partService, ExamUserService examUserService, ObjectMapper mapper) {
@@ -71,7 +70,6 @@ public class ExamController {
         }
         examPage = examService.findAllByCreatedBy_Username(pageable, username);
         return new PageResult(examPage);
-
     }
 
     @GetMapping(value = "/exams/list-all-by-user")
@@ -202,7 +200,19 @@ public class ExamController {
         return new ResponseEntity(examQuestionList, HttpStatus.OK);
 
     }
+    public List<AnswerSheet> convertAnswerJsonToObject(ExamUser examUser) throws IOException {
 
+//        ObjectMapper mapper = new ObjectMapper();
+        if (Strings.isNullOrEmpty(examUser.getAnswerSheet())) {
+            return Collections.emptyList();
+        }
+
+        String answerSheet = examUser.getAnswerSheet();
+        List<AnswerSheet> choiceUsers = mapper.readValue(answerSheet, new TypeReference<List<AnswerSheet>>() {
+        });
+        return choiceUsers;
+    }
+//
     @PostMapping(value = "/exams")
     public ResponseEntity<?> createExam(@Valid @RequestBody Exam exam, @RequestParam Long intakeId, @RequestParam Long partId, @RequestParam boolean isShuffle, boolean locked) {
         try {
@@ -272,8 +282,8 @@ public class ExamController {
         }
 
     }
-
-
+//
+//
     @GetMapping(value = "/exams/{examId}/result/all")
     public ResponseEntity getResultExamAll(@PathVariable Long examId) throws IOException {
         List<ExamResult> examResults = new ArrayList<>();
@@ -377,7 +387,14 @@ public class ExamController {
         }
         return new ResponseEntity(questionExamReports, HttpStatus.OK);
     }
-
+    public List<ExamQuestionPoint> convertQuestionJsonToObject(Optional<Exam> exam) throws IOException {
+//        ObjectMapper mapper = new ObjectMapper();
+        String answerSheet = exam.get().getQuestionData();
+        List<ExamQuestionPoint> examQuestionPoints = mapper.readValue(answerSheet, new TypeReference<List<ExamQuestionPoint>>() {
+        });
+        return examQuestionPoints;
+    }
+//
     @GetMapping(value = "/exams/{examId}/result")
     public ResponseEntity getResultExam(@PathVariable Long examId) throws IOException {
         ExamResult examResult = new ExamResult();
@@ -445,18 +462,7 @@ public class ExamController {
         return new ResponseEntity(examResult, HttpStatus.OK);
     }
 
-    public List<AnswerSheet> convertAnswerJsonToObject(ExamUser examUser) throws IOException {
 
-//        ObjectMapper mapper = new ObjectMapper();
-        if (Strings.isNullOrEmpty(examUser.getAnswerSheet())) {
-            return Collections.emptyList();
-        }
-
-        String answerSheet = examUser.getAnswerSheet();
-        List<AnswerSheet> choiceUsers = mapper.readValue(answerSheet, new TypeReference<List<AnswerSheet>>() {
-        });
-        return choiceUsers;
-    }
 
     @GetMapping(value = "/exam/{id}/question-text")
     public List<ExamDetail> getQuestionTextByExamId(@PathVariable Long id) throws IOException {
@@ -475,13 +481,7 @@ public class ExamController {
         return questions;
     }
 
-    public List<ExamQuestionPoint> convertQuestionJsonToObject(Optional<Exam> exam) throws IOException {
-//        ObjectMapper mapper = new ObjectMapper();
-        String answerSheet = exam.get().getQuestionData();
-        List<ExamQuestionPoint> examQuestionPoints = mapper.readValue(answerSheet, new TypeReference<List<ExamQuestionPoint>>() {
-        });
-        return examQuestionPoints;
-    }
+
 
     @GetMapping(value = "/exams/schedule")
     public List<ExamCalendar> getExamCalendar() {
@@ -542,6 +542,7 @@ public class ExamController {
 
         }
     }
+//
 
 }
 

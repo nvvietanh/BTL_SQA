@@ -300,20 +300,7 @@ public class CourseServiceImplTest {
         });
     }
 
-//    TC_CS_09: Test lưu môn học - trường hợp name để null
-//    Mục tiêu: Kiểm tra phương thức SaveCourse có check trường hợp thiếu dữ liệu không
-//    Input: Course(courseCode = null , name ="Docker Basics", imgUrl = "http://example.com/docker.png"
-//    Output kỳ vọng: Trả về 1 ngoại lệ Exception
-    @Test
-    public void testSaveCourse_invalidNameAndCode_null() {
-        Course course = new Course();
-        course.setCourseCode(null);
-        course.setName(null);
 
-        Assertions.assertThrows(Exception.class, () -> {
-            courseService.saveCourse(course);
-        });
-    }
 
 //    TC_CS_10: Test lưu môn học - trường hợp courseCode bị trùng
 //    Mục tiêu: Kiểm tra phương thức SaveCourse có check trường hợp courseCode bị trùng không

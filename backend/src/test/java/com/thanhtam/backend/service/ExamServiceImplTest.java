@@ -9,8 +9,11 @@ import com.thanhtam.backend.dto.ExamQuestionPoint;
 import com.thanhtam.backend.dto.ExamResult;
 import com.thanhtam.backend.entity.*;
 import com.thanhtam.backend.repository.ExamRepository;
+import com.thanhtam.backend.repository.IntakeRepository;
+import com.thanhtam.backend.repository.PartRepository;
 import com.thanhtam.backend.ultilities.ERole;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -19,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import junit.framework.Assert;
@@ -33,13 +37,14 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@Transactional // Rollback dữ liệu sau mỗi test case
+@Transactional // Rollback dữ liệu sau mỗi test case
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class ExamServiceImplTest {
 
@@ -65,708 +70,395 @@ public class ExamServiceImplTest {
     @Autowired
     private CourseService courseService;
 
-    @Test
+    @Autowired
+    private IntakeRepository intakeRepository;
 
-    // TS_ES_01
-    public void testCreateExam_Success() {
-        Assert.assertNotNull("ExamService bị null!", examService);
-        Assert.assertNotNull("UserService bị null!", userService);
-        Assert.assertNotNull("IntakeService bị null!", intakeService);
-        Assert.assertNotNull("PartService bị null!", partService);
+    @Autowired
+    private PartRepository partRepository;
 
-        // Lấy thông tin user "admin" từ DB (stub lại UserService)
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("thanhtam28ss");
-        Optional<User> foundUser = userService.getUserByUsername("thanhtam28ss");
 
-        // Stub Intake
+
+    private Intake createValidIntake() {
         Intake intake = new Intake();
-        intake.setId(1L);
-        Optional<Intake> foundIntake = intakeService.findById(new Long(1));
-
-        Part part = new Part();
-        part.setId(1L);
-
-        Optional<Part> foundPart = partService.findPartById(1L);
-
-        // Tạo mới Exam
-        Exam exam = new Exam();
-        exam.setTitle("Bài kiểm tra Java");
-        System.out.println(foundIntake);
-        System.out.println(foundPart);
-        System.out.println(foundUser);
-        exam.setIntake(foundIntake.get());
-        exam.setPart(foundPart.get());
-        exam.setCreatedBy(foundUser.get());
-        exam.setShuffle(true);
-        exam.setCanceled(false);
-        exam.setBeginExam(new Date());
-        exam.setFinishExam(new Date());
-        exam.setQuestionData("'[{\"questionId\":136,\"point\":5},{\"questionId\":137,\"point\":5}," +
-                "{\"questionId\":145,\"point\":15},{\"questionId\":147,\"point\":10}," +
-                "{\"questionId\":148,\"point\":10},{\"questionId\":149,\"point\":15}," +
-                "{\"questionId\":150,\"point\":5},{\"questionId\":151,\"point\":5}," +
-                "{\"questionId\":152,\"point\":10},{\"questionId\":153,\"point\":10}," +
-                "{\"questionId\":154,\"point\":10}]'");
-
-        // Lưu exam vào DB thông qua ExamService thật
-        Exam savedExam = examService.saveExam(exam);
-        Assert.assertNotNull("Exam sau khi lưu bị null!", savedExam);
-        Assert.assertNotNull("Exam ID sau khi lưu bị null!", savedExam.getId());
-
-        // Lấy lại exam từ DB để kiểm tra
-        Optional<Exam> examOpt = examRepository.findById(savedExam.getId());
-        Assert.assertTrue("Exam không được lưu vào DB!", examOpt.isPresent());
-
-        Exam examFromDb = examOpt.get();
-        Assert.assertEquals("Bài kiểm tra Java", examFromDb.getTitle());
-        Assert.assertFalse(examFromDb.isCanceled());
-        Assert.assertTrue(examFromDb.isShuffle());
-
-        // Kiểm tra các đối tượng liên kết
-        Assert.assertNotNull(examFromDb.getIntake());
-        Assert.assertNotNull(examFromDb.getPart());
-        Assert.assertNotNull(examFromDb.getCreatedBy());
+        intake.setName("Intake Test");
+        return intakeRepository.save(intake);
     }
 
-    // TC_ES_02
-    @Test
-    public void testCreateExam_Fail_IDMismatch_1() {
-        Assert.assertNotNull("ExamService bị null!", examService);
-        Assert.assertNotNull("UserService bị null!", userService);
-        Assert.assertNotNull("IntakeService bị null!", intakeService);
-        Assert.assertNotNull("PartService bị null!", partService);
-
-        // Stub UserService để trả về user hợp lệ
-        User user = new User();
-        user.setId(1000L);
-        user.setUsername("thanhtam28ss");
-//        org.mockito.Mockito.when(userService.getUserByUsername("thanhtam28ss"))
-//                .thenReturn(Optional.of(user));
-        User foundUser = userService.getUserByUsername("thanhtam28ss").orElse(null);
-
-        // Stub IntakeService
-        Intake intake = new Intake();
-        intake.setId(1L);
-//        org.mockito.Mockito.when(intakeService.findById(intake.getId()))
-//                .thenReturn(Optional.of(intake));
-        Intake foundIntake = intakeService.findById(intake.getId()).orElse(null);
-
-
-        // Stub PartService
+    private Part createValidPart() {
         Part part = new Part();
-        part.setId(1000L);
-//        org.mockito.Mockito.when(partService.findPartById(part.getId()))
-//                .thenReturn(Optional.of(part));
-        Part foundPart = partService.findPartById(part.getId()).orElse(null);
+        part.setName("Part A");
+        return partRepository.save(part);
+    }
+//    TC_ES_01
+//    Lưu thành công một Exam hợp lệ
+//    input: Exam(title = "Midterm", duration = 90, intake ≠ null, part ≠ null, questionData ≠ null)
+//    output: Lưu thành công vào DB (exam có ID ≠ null)
+    @Test
+    @Rollback(true)
+    public void testSaveExam_success() {
+        Intake intake = createValidIntake();
+        Part part = createValidPart();
 
         Exam exam = new Exam();
-        exam.setTitle("Bài kiểm tra Java - Fail ID Test");
-        System.out.println(foundIntake);
-        System.out.println(foundPart);
-        System.out.println(foundUser);
-        exam.setIntake(foundIntake);
-        exam.setPart(foundPart);
-        exam.setCreatedBy(foundUser);
+        exam.setTitle("Midterm");
+        exam.setIntake(intake);
+        exam.setPart(part);
+        exam.setDurationExam(90);
+        exam.setBeginExam(new Date());
+        exam.setFinishExam(new Date(System.currentTimeMillis() + 3600000)); // +1h
+        exam.setQuestionData("{\"questions\":[]}");
         exam.setShuffle(true);
         exam.setCanceled(false);
-        exam.setBeginExam(new Date());
-        exam.setFinishExam(new Date());
-        exam.setQuestionData("'[{\"questionId\":136,\"point\":5},{\"questionId\":137,\"point\":5}," +
-                "{\"questionId\":145,\"point\":15},{\"questionId\":147,\"point\":10}," +
-                "{\"questionId\":148,\"point\":10},{\"questionId\":149,\"point\":15}," +
-                "{\"questionId\":150,\"point\":5},{\"questionId\":151,\"point\":5}," +
-                "{\"questionId\":152,\"point\":10},{\"questionId\":153,\"point\":10}," +
-                "{\"questionId\":154,\"point\":10}]'");
 
-        Exam savedExam = examService.saveExam(exam);
-        Assert.assertNull("Exam sau khi lưu bị null!", savedExam);
-        Assert.assertNull("Exam ID sau khi lưu bị null!", savedExam.getId());
-        // Lấy lại exam từ DB để kiểm tra
-        Optional<Exam> examOpt = examRepository.findById(savedExam.getId());
-        Assert.assertTrue("Exam không được lưu vào DB!", examOpt.isPresent());
+        Exam saved = examService.saveExam(exam);
 
-        Exam examFromDb = examOpt.get();
-        Assert.assertEquals("Bài kiểm tra Java", examFromDb.getTitle());
-        Assert.assertFalse(examFromDb.isCanceled());
-        Assert.assertTrue(examFromDb.isShuffle());
-
-        // Kiểm tra các đối tượng liên kết
-        Assert.assertNotNull(examFromDb.getIntake());
-        Assert.assertNotNull(examFromDb.getPart());
-        Assert.assertNotNull(examFromDb.getCreatedBy());
+        assertNotNull(saved.getId());
+        assertEquals("Midterm", saved.getTitle());
     }
-    // TC03
+//    TC_ES_02
+//    Title bị null
+//    input: Exam(title = null, duration = 60, intake ≠ null, part ≠ null, questionData ≠ null)
+//    output: Trả về Exception
     @Test
-    public void testCreateExam_Fail_IDMismatch_2() {
-        Assert.assertNotNull("ExamService bị null!", examService);
-        Assert.assertNotNull("UserService bị null!", userService);
-        Assert.assertNotNull("IntakeService bị null!", intakeService);
-        Assert.assertNotNull("PartService bị null!", partService);
-
-        // Stub UserService để trả về user hợp lệ
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("thanhtam28ss");
-
-        User foundUser = userService.getUserByUsername("thanhtam28ss").orElse(null);
-
-        // Stub IntakeService
-        Intake intake = new Intake();
-        intake.setId(1000L); // ID tồn tại trong DB
-
-        Intake foundIntake = intakeService.findById(intake.getId()).orElse(null);
-
-        // Stub PartService
-        Part part = new Part();
-        part.setId(1L); // ID không tồn tại trong DB
-        Part foundPart = partService.findPartById(part.getId()).orElse(null);
+    @Rollback(true)
+    public void testSaveExam_titleNull_shouldThrowException() {
+        Intake intake = createValidIntake();
+        Part part = createValidPart();
 
         Exam exam = new Exam();
-        exam.setTitle("Bài kiểm tra Java - Fail ID Test");
-        System.out.println(foundIntake);
-        System.out.println(foundPart);
-        System.out.println(foundUser);
-        exam.setIntake(foundIntake);
-        exam.setPart(foundPart);
-        exam.setCreatedBy(foundUser);
-        exam.setShuffle(true);
-        exam.setCanceled(false);
+        exam.setTitle(null);
+        exam.setIntake(intake);
+        exam.setPart(part);
+        exam.setDurationExam(60);
         exam.setBeginExam(new Date());
-        exam.setFinishExam(new Date());
-        exam.setQuestionData("'[{\"questionId\":136,\"point\":5},{\"questionId\":137,\"point\":5}," +
-                "{\"questionId\":145,\"point\":15},{\"questionId\":147,\"point\":10}," +
-                "{\"questionId\":148,\"point\":10},{\"questionId\":149,\"point\":15}," +
-                "{\"questionId\":150,\"point\":5},{\"questionId\":151,\"point\":5}," +
-                "{\"questionId\":152,\"point\":10},{\"questionId\":153,\"point\":10}," +
-                "{\"questionId\":154,\"point\":10}]'");
+        exam.setFinishExam(new Date(System.currentTimeMillis() + 3600000));
+        exam.setQuestionData("{}");
 
-        Exam savedExam = examService.saveExam(exam);
-        Assert.assertNull("Exam sau khi lưu bị null!", savedExam);
-        Assert.assertNull("Exam ID sau khi lưu bị null!", savedExam.getId());
-
+        assertThrows(Exception.class, () -> examService.saveExam(exam));
     }
-    //TC_ES_04
+
+//    TC_ES_03
+//    Title rỗng ("")
+//    input: Exam(title = "", duration = 60, intake ≠ null, part ≠ null, questionData ≠ null)
+//    output: Trả về Exception
     @Test
-    public void testCreateExam_Fail_IDMismatch_3() {
-        Assert.assertNotNull("ExamService bị null!", examService);
-        Assert.assertNotNull("UserService bị null!", userService);
-        Assert.assertNotNull("IntakeService bị null!", intakeService);
-        Assert.assertNotNull("PartService bị null!", partService);
-
-        // Stub UserService để trả về user hợp lệ
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("thanhtam28ss");
-        User foundUser = userService.getUserByUsername("thanhtam28ss").orElse(null);
-
-        // Stub IntakeService
-        Intake intake = new Intake();
-        intake.setId(1000L); // ID không tồn tại trong DB
-
-        Intake foundIntake = intakeService.findById(intake.getId()).orElse(null);
-
-        // Stub PartService
-        Part part = new Part();
-        part.setId(1000L); // ID tồn tại trong DB
-
-        Part foundPart = partService.findPartById(part.getId()).orElse(null);
+    @Rollback(true)
+    public void testSaveExam_titleEmpty_shouldThrowException() {
+        Intake intake = createValidIntake();
+        Part part = createValidPart();
 
         Exam exam = new Exam();
-        exam.setTitle("Bài kiểm tra Java - Fail ID Test");
-        System.out.println(foundIntake);
-        System.out.println(foundPart);
-        System.out.println(foundUser);
-        exam.setIntake(foundIntake);
-        exam.setPart(foundPart);
-        exam.setCreatedBy(foundUser);
-        exam.setShuffle(true);
-        exam.setCanceled(false);
+        exam.setTitle("");
+        exam.setIntake(intake);
+        exam.setPart(part);
+        exam.setDurationExam(60);
         exam.setBeginExam(new Date());
-        exam.setFinishExam(new Date());
-        exam.setQuestionData("'[{\"questionId\":136,\"point\":5},{\"questionId\":137,\"point\":5}," +
-                "{\"questionId\":145,\"point\":15},{\"questionId\":147,\"point\":10}," +
-                "{\"questionId\":148,\"point\":10},{\"questionId\":149,\"point\":15}," +
-                "{\"questionId\":150,\"point\":5},{\"questionId\":151,\"point\":5}," +
-                "{\"questionId\":152,\"point\":10},{\"questionId\":153,\"point\":10}," +
-                "{\"questionId\":154,\"point\":10}]'");
+        exam.setFinishExam(new Date(System.currentTimeMillis() + 3600000));
+        exam.setQuestionData("{}");
 
-        Exam savedExam = examService.saveExam(exam);
-        Assert.assertNull("Exam sau khi lưu bị null!", savedExam);
-        Assert.assertNull("Exam ID sau khi lưu bị null!", savedExam.getId());
-
-    }
-    // TC_ES_05
-    @Test
-    @Transactional
-    public void testGetExamsByPage_Admin() {
-        // Tạo người dùng ADMIN
-        User foundUser = userService.getUserByUsername("thanhtam28ss").orElse(null);
-        Assert.assertTrue(
-                "User ko phai admin " + foundUser.getRoles(),
-                foundUser.getRoles().stream()
-                        .anyMatch(role -> role.getName().equals(ERole.ROLE_ADMIN))
-        );
-        // Tạo Pageable
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
-
-        // Gọi phương thức lấy bài thi cho ADMIN
-        Page<Exam> exams = examService.findAll(pageable);
-
-        // Kiểm tra kết quả
-        Assert.assertNotNull("Danh sách bài thi bị null",exams);
-
+        assertThrows(Exception.class, () -> examService.saveExam(exam));
     }
 
-
+//    TC_ES_04
+//    beginExam sau finishExam
+//    input: Exam(title = "Wrong Time", beginExam = 10:00, finishExam = 09:00, intake ≠ null, part ≠ null)
+//    output: Trả về Exception
     @Test
-    @Transactional
-    public void testGetExamsByPage_USER() {
-        // Tạo người dùng USER
-        User foundUser = userService.getUserByUsername("1524801040049").orElse(null);
-        Assert.assertNotNull("USER không tồn tại", foundUser);
+    @Rollback(true)
+    public void testSaveExam_beginAfterFinish_shouldThrowException() {
+        Intake intake = createValidIntake();
+        Part part = createValidPart();
 
+        Exam exam = new Exam();
+        exam.setTitle("Wrong Time");
+        exam.setIntake(intake);
+        exam.setPart(part);
+        exam.setDurationExam(90);
+        exam.setBeginExam(new Date(System.currentTimeMillis() + 7200000)); // +2h
+        exam.setFinishExam(new Date(System.currentTimeMillis() + 3600000)); // +1h
+        exam.setQuestionData("{}");
 
-        // Tạo Pageable
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
-
-        // Gọi phương thức lấy bài thi cho user là LECTURER (không phải admin)
-        Page<Exam> exams = examService.findAllByCreatedBy_Username(pageable, foundUser.getUsername());
-        // Kiểm tra kết quả
-        Assert.assertNull("Exams should be null for USER role", exams);
-    }
-    // TC_ES_06
-    @Test
-    @Transactional
-    public void testCancelExam() {
-        // Tìm 1 kỳ thi
-        Optional<Exam> result = examService.getExamById(195L);
-        Assert.assertTrue("Exam ko ton tai",result.isPresent());
-        Exam exam = result.get();
-        examService.cancelExam(exam.getId());
-
-        Assert.assertNotNull("Exam bị null sau khi huỷ", exam);
-        Assert.assertTrue("Exam chưa được huỷ", exam.isCanceled());
+        assertThrows(Exception.class, () -> examService.saveExam(exam));
     }
 
+//    TC_ES_05
+//    intake bị null
+//    input: Exam(title = "No Intake", intake = null, part ≠ null, duration = 60, questionData ≠ null)
+//    output: Trả về Exception
     @Test
-    @Transactional
-    public void testCancelExamFail_NonExistentExam() {
-        Long nonExistentExamId = 2000L;
+    @Rollback(true)
+    public void testSaveExam_intakeNull_shouldThrowException() {
+        Part part = createValidPart();
 
-        // Expect EntityNotFoundException for non-existent exam
-        EntityNotFoundException exception = assertThrows(
-                EntityNotFoundException.class,
-                () -> examService.cancelExam(nonExistentExamId),
-                "Expected EntityNotFoundException for non-existent exam ID"
-        );
+        Exam exam = new Exam();
+        exam.setTitle("No Intake");
+        exam.setIntake(null);
+        exam.setPart(part);
+        exam.setDurationExam(60);
+        exam.setBeginExam(new Date());
+        exam.setFinishExam(new Date(System.currentTimeMillis() + 3600000));
+        exam.setQuestionData("{}");
 
-        // Verify exception message (optional, adjust based on implementation)
-        assertEquals("Exam with ID 2000 not found", exception.getMessage());
-
-        // Verify exam still doesn't exist
-        assertFalse(examService.getExamById(nonExistentExamId).isPresent(),
-                "Non-existent exam should not be found after cancel attempt");
+        assertThrows(Exception.class, () -> examService.saveExam(exam));
     }
-    //    TC_ES_07
+
+//    TC_ES_06
+//    part bị null
+//    input: Exam(title = "No Part", intake ≠ null, part = null, duration = 60, questionData ≠ null)
+//    output: Trả về Exception
     @Test
-    @Transactional
-    public void testGetExamById_ExamNotFound() {
-        //ID không tồn tại trong cơ sở dữ liệu
-        Long examId = 1000L;
-        // Gọi phương thức getExamById và trả về Optional.empty() nếu không tìm thấy kỳ thi
+    @Rollback(true)
+    public void testSaveExam_partNull_shouldThrowException() {
+        Intake intake = createValidIntake();
+
+        Exam exam = new Exam();
+        exam.setTitle("No Part");
+        exam.setIntake(intake);
+        exam.setPart(null);
+        exam.setDurationExam(60);
+        exam.setBeginExam(new Date());
+        exam.setFinishExam(new Date(System.currentTimeMillis() + 3600000));
+        exam.setQuestionData("{}");
+
+        assertThrows(Exception.class, () -> examService.saveExam(exam));
+    }
+
+//    TC_ES_07
+//    questionData = null
+//    input: Exam(title = "No Data", questionData = null, intake ≠ null, part ≠ null)
+//    output: Trả về Exception
+    @Test
+    @Rollback(true)
+    public void testSaveExam_questionDataNull_shouldThrowException() {
+        Intake intake = createValidIntake();
+        Part part = createValidPart();
+
+        Exam exam = new Exam();
+        exam.setTitle("No Questions");
+        exam.setIntake(intake);
+        exam.setPart(part);
+        exam.setDurationExam(60);
+        exam.setBeginExam(new Date());
+        exam.setFinishExam(new Date(System.currentTimeMillis() + 3600000));
+        exam.setQuestionData(null);
+
+        assertThrows(Exception.class, () -> examService.saveExam(exam));
+    }
+
+//    TC_ES_08
+//    canceled = true
+//    input: Exam(title = "Canceled", canceled = true, intake ≠ null, part ≠ null, questionData ≠ null)
+//    output: Lưu thành công, exam.isCanceled() == true
+    @Test
+    @Rollback(true)
+    public void testSaveExam_canceledTrue_shouldSaveSuccessfully() {
+        Intake intake = createValidIntake();
+        Part part = createValidPart();
+
+        Exam exam = new Exam();
+        exam.setTitle("Canceled Exam");
+        exam.setIntake(intake);
+        exam.setPart(part);
+        exam.setCanceled(true);
+        exam.setDurationExam(45);
+        exam.setBeginExam(new Date());
+        exam.setFinishExam(new Date(System.currentTimeMillis() + 2700000));
+        exam.setQuestionData("{}");
+
+        Exam saved = examService.saveExam(exam);
+
+        assertTrue(saved.isCanceled());
+    }
+    private void createTestExams(int count) {
+        for (int i = 1; i <= count; i++) {
+            Exam exam = new Exam();
+            exam.setTitle("Exam " + i);
+            exam.setDurationExam(60 + i);
+            exam.setBeginExam(new Date());
+            exam.setFinishExam(new Date());
+            exam.setQuestionData("data " + i);
+            examRepository.save(exam);
+        }
+    }
+    // ==========================
+    //    TC_ES_09
+    //    Truy xuất trang đầu tiên
+    //    input: Pageable.of(0, 5)
+    //    output: Lấy được 5 bản ghi đầu tiên (0–4)
+    // ==========================
+    @Test
+    @Rollback
+    public void testFindAll_page0_size5() {
+        createTestExams(10);
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("id").ascending());
+        Page<Exam> result = examService.findAll(pageable);
+        Assertions.assertEquals(5, result.getContent().size());
+        Assertions.assertEquals(0, result.getNumber());
+    }
+    // ==========================
+    //    TC_ES_10
+    //    Truy xuất trang giữa
+    //    input: Pageable.of(1, 3)
+    //    output: Lấy được bản ghi từ số 4 đến 6
+    // ==========================
+    @Test
+    @Rollback
+    public void testFindAll_page1_size3() {
+        createTestExams(10);
+        Pageable pageable = PageRequest.of(1, 3, Sort.by("id").ascending());
+        Page<Exam> result = examService.findAll(pageable);
+        Assertions.assertEquals(3, result.getContent().size());
+        Assertions.assertEquals(1, result.getNumber());
+    }
+
+    // ==========================
+    //    TC_ES_11
+    //    Truy xuất trang vượt quá số lượng bản ghi
+    //    input: Pageable.of(10, 5) khi chỉ có 5 bản ghi
+    //    output: Page rỗng
+    // ==========================
+    @Test
+    @Rollback
+    public void testFindAll_pageOutOfBounds() {
+        examRepository.deleteAll(); // Xóa hết dữ liệu trước test
+        createTestExams(5);
+        Pageable pageable = PageRequest.of(10, 5);
+        Page<Exam> result = examService.findAll(pageable);
+        Assertions.assertTrue(result.getContent().isEmpty());
+    }
+
+    private Long createExamWithCanceled(boolean canceled) {
+        Exam exam = new Exam();
+        exam.setTitle("To be canceled");
+        exam.setCanceled(canceled);
+        exam.setDurationExam(90);
+        exam.setBeginExam(new java.util.Date());
+        exam.setFinishExam(new java.util.Date());
+        exam.setQuestionData("Sample question data");
+        return examRepository.save(exam).getId();
+    }
+
+    // ==========================
+    //    TC_ES_12
+    //    Hủy bài thi hợp lệ
+    //    input: id = 1 (exam chưa bị hủy)
+    //    output: isCanceled = true
+    // ==========================
+    @Test
+    @Rollback
+    public void testCancelExam_validId() {
+        Long examId = createExamWithCanceled(false);
+        examService.cancelExam(examId);
+        Exam updatedExam = examRepository.findById(examId).orElse(null);
+        Assertions.assertNotNull(updatedExam);
+    }
+
+    // ==========================
+    //    TC_ES_13
+    //    Hủy bài thi đã bị hủy từ trước
+    //    input: id = 2 (exam đã bị hủy)
+    //    output: vẫn là isCanceled = true, không lỗi
+    // ==========================
+    @Test
+    @Rollback
+    public void testCancelExam_alreadyCanceled() {
+        Long examId = createExamWithCanceled(true);
+        examService.cancelExam(examId);  // gọi lại
+        Exam updatedExam = examRepository.findById(examId).orElse(null);
+        Assertions.assertNotNull(updatedExam);
+        Assertions.assertTrue(updatedExam.isCanceled());
+    }
+
+    // ==========================
+    //    TC_ES_14
+    //    Hủy bài thi không tồn tại
+    //    input: id = 999
+    //    output: không có lỗi, không làm gì cả
+    // ==========================
+    @Test
+    @Rollback
+    public void testCancelExam_invalidId() {
+        Long invalidId = 999L;
+        examService.cancelExam(invalidId);  // không lỗi
+        Assertions.assertFalse(examRepository.findById(invalidId).isPresent());
+    }
+
+    // ==========================
+    //    TC_ES_15
+    //    Hủy bài thi với ID null
+    //    input: id = null
+    //    output: trả về Exception
+    // ==========================
+    @Test
+    @Rollback
+    public void testCancelExam_nullId() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            examService.cancelExam(null);
+        });
+    }
+
+    private Long createSampleExam() {
+        Exam exam = new Exam();
+        exam.setTitle("Sample Exam");
+        exam.setCanceled(false);
+        exam.setDurationExam(60);
+        exam.setQuestionData("Sample question data");
+        exam = examRepository.save(exam);
+        return exam.getId();
+    }
+
+    // ==========================
+    //    TC_ES_16
+    //    Lấy exam theo ID hợp lệ
+    //    input: id = valid id (ví dụ 1)
+    //    output: Optional chứa Exam có id = input id
+    // ==========================
+    @Test
+    @Rollback
+    public void testGetExamById_validId() {
+        Long examId = createSampleExam();
         Optional<Exam> result = examService.getExamById(examId);
-
-        // Kiểm tra kết quả
-        Assert.assertFalse( "Kỳ thi không tồn tại với ID: " + examId,result.isPresent());
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(examId, result.get().getId());
     }
 
-    //    TC_ES_08
+    // ==========================
+    //    TC_ES_17
+    //    Lấy exam với ID không tồn tại
+    //    input: id = 999 (giả sử không có exam này)
+    //    output: Optional.empty()
+    // ==========================
     @Test
-    @Transactional
-    public void testGetExamById_ExamFound() {
-
-        // Giả lập ID tồn tại trong cơ sở dữ liệu
-        Long examId = 200L;  // Đây là ID giả lập
-
-        // Gọi phương thức getExamById và trả về Optional.empty() nếu không tìm thấy kỳ thi
-        Optional<Exam> result = examService.getExamById(examId);
-
-        // Kiểm tra kết quả
-        Assert.assertTrue( "Kỳ thi không nên tồn tại với ID: " + examId,result.isPresent());
+    @Rollback
+    public void testGetExamById_nonExistingId() {
+        Optional<Exam> result = examService.getExamById(999L);
+        Assertions.assertFalse(result.isPresent());
     }
 
-//    @Test
-//    @Transactional
-//    public void testGetChoiceList_WithRandomData() {
-//        Question question = new Question();
-//        question.setId(101L);
-//        question.setQuestionText("Dummy question?");
-//
-//        Choice choice1 = new Choice(1L, "Option A", 0);
-//        Choice choice2 = new Choice(2L, "Option B", 1);
-//
-//        AnswerSheet answerSheet = new AnswerSheet();
-//        answerSheet.setQuestionId(101L);
-//        answerSheet.setChoices(Arrays.asList(choice1, choice2));
-//        answerSheet.setPoint(1);
-//
-//        // Tạo ExamQuestionPoint (thông tin câu hỏi thi)
-//        ExamQuestionPoint examQuestionPoint = new ExamQuestionPoint(101L, 1);
-//
-//        // Gọi hàm cần test
-//        List<ChoiceList> result = examService.getChoiceList(
-//                Arrays.asList(answerSheet),
-//                Arrays.asList(examQuestionPoint)
-//        );
-//
-//        // Kiểm tra kết quả trả về
-//        Assert.assertEquals(1, result.size());
-//        ChoiceList choiceList = result.get(0);
-//
-//        Assert.assertEquals(Long.valueOf(101L), choiceList.getQuestion().getId());
-//
-//        Assert.assertEquals(2, choiceList.getChoices().size());
-//        Assert.assertNotNull(choiceList.getIsSelectedCorrected());
-//
-//        Assert.assertEquals(Optional.of(1), Optional.of(choiceList.getPoint()));
-//    }
 
-    //TC_ES_09
+//    TC_ES_18
+//    Lấy danh sách exam theo username hợp lệ
+//    input: pageable = PageRequest(0,10), username = "user1"
+//    output: Trả về Page chứa các exam tạo bởi "user1"
     @Test
-    @Transactional
-    public void testGetExamsByPage_Lecturer() {
-        // Tạo người dùng LECTURER
-        User foundUser = userService.getUserByUsername("tamht298").orElse(null);
-        Assert.assertNotNull("Giang vien không tồn tại", foundUser);
-
-        // Kiểm tra user phải có role LECTURER
-        Assert.assertTrue(
-                "User không phải lecturer " + foundUser.getRoles(),
-                foundUser.getRoles().stream()
-                        .anyMatch(role -> role.getName().equals(ERole.ROLE_LECTURER))
-        );
-
-        // Tạo Pageable
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("id"));
-
-        // Gọi phương thức lấy bài thi cho LECTURER
-        Page<Exam> exams = examService.findAllByCreatedBy_Username(pageable, foundUser.getUsername());
-
-        // Kiểm tra kết quả
-        Assert.assertNotNull("Danh sách bài thi bị null", exams);
-    }
-
-    // TC_ES_10
-    @Test
-    @Transactional
-    public void testCreateExamWithUsers() {
-        // Lấy Exam
-        Optional<Exam> result = examService.getExamById(200L);
-        Assert.assertTrue("Exam không tồn tại!", result.isPresent());
-        Exam exam = result.get();
-
-        // Lấy danh sách User theo intake
-        List<User> users = userService.findAllByIntakeId(exam.getIntake().getId());
-        Assert.assertFalse("Không có user nào trong intake!", users.isEmpty());
-
-        // Đếm số lượng ExamUser trước khi gán
-        List<ExamUser> before = examUserService.findAllByExam_Id(exam.getId());
-        int beforeCount = before.size();
-
-        // Gọi hàm cần test
-        examUserService.create(exam, users);
-
-        // Đếm số lượng sau khi gán
-        List<ExamUser> after = examUserService.findAllByExam_Id(exam.getId());
-        int afterCount = after.size();
-
-        // So sánh số lượng tăng đúng bằng số lượng users
-        int diff = afterCount - beforeCount;
-        Assert.assertEquals("Số lượng user được gán thêm không đúng!", users.size(), diff);
-
-        // Kiểm tra từng user có được gán mới không (nếu cần)
-        List<Long> expectedUserIds = users.stream().map(User::getId).collect(Collectors.toList());
-        List<Long> actualUserIds = after.stream().map(eu -> eu.getUser().getId()).collect(Collectors.toList());
-
-        for (Long id : expectedUserIds) {
-            Assert.assertTrue("User ID " + id + " không được gán!", actualUserIds.contains(id));
-        }
-    }
-    // TC_ES_11
-    @Test
-    @Transactional
-    public void testGetExamListByUsername() {
-        // Tạo dữ liệu cho User và Exam
-        Optional<User> result = userService.getUserByUsername("1624801040051");
-        Assert.assertTrue("User không tồn tại!", result.isPresent());
-        User user = result.get();
-
-        List<ExamUser> li = examUserService.getExamListByUsername(user.getUsername());
-        Assert.assertNotNull("Danh Sach Bai Thi Rong",li);
-        // Kiểm tra rằng danh sách các ExamUser chứa đúng thông tin Exam và User
-        for (ExamUser examUser : li) {
-            Assert.assertEquals("Username không đúng!", user.getUsername(), examUser.getUser().getUsername());
-            Assert.assertNotNull("Exam không tồn tại!", examUser.getExam());
-        }
-    }
-    // TC_ES_12
-    @Test
-    @Transactional
-    public void testFindByExamAndUser() {
-        // Tạo dữ liệu  cho Exam
-        Optional<Exam> result = examService.getExamById(195L);
-        Assert.assertTrue("Exam không tồn tại!", result.isPresent());
-        Exam exam = result.get();
-
-        Optional<User> result2 = userService.getUserByUsername("1624801040051");
-        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        ExamUser foundExamUser = examUserService.findByExamAndUser(exam.getId(), user.getUsername());
-        // Kiểm tra rằng ExamUser đã được tìm thấy và đúng với dữ liệu
-        Assert.assertNotNull("ExamUser không tồn tại!", foundExamUser);
-        Assert.assertEquals("Exam ID không đúng!", exam.getId(), foundExamUser.getExam().getId());
-        Assert.assertEquals("Username không đúng!", user.getUsername(), foundExamUser.getUser().getUsername());
-    }
-
-    @Test
-    @Transactional
-    public void testFindByExamAndUser_FAIL1() {
-        // Tạo dữ liệu cho Exam
-        Optional<Exam> result = examService.getExamById(500L);
-//        Assert.assertTrue("Exam không tồn tại!", result.isPresent());
-        Exam exam = result.get();
-
-        Optional<User> result2 = userService.getUserByUsername("1624801040051");
-//        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        ExamUser foundExamUser = examUserService.findByExamAndUser(exam.getId(), user.getUsername());
-        // Kiểm tra rằng ExamUser đã được tìm thấy và đúng với dữ liệu
-        Assert.assertNull("ExamUser không tồn tại!", foundExamUser);
-        Assert.assertEquals("Exam ID không đúng!", exam.getId(), foundExamUser.getExam().getId());
-        Assert.assertEquals("Username không đúng!", user.getUsername(), foundExamUser.getUser().getUsername());
-    }
-
-    @Test
-    @Transactional
-    public void testFindByExamAndUser_FAIL2() {
-        // Tạo dữ liệu cho Exam
-        Optional<Exam> result = examService.getExamById(195L);
-        Assert.assertTrue("Exam không tồn tại!", result.isPresent());
-        Exam exam = result.get();
-
-        Optional<User> result2 = userService.getUserByUsername("162480104005115125");
-        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        ExamUser foundExamUser = examUserService.findByExamAndUser(exam.getId(), user.getUsername());
-        // Kiểm tra rằng ExamUser đã được tìm thấy và đúng với dữ liệu
-        Assert.assertNotNull("ExamUser không tồn tại!", foundExamUser);
-        Assert.assertEquals("Exam ID không đúng!", exam.getId(), foundExamUser.getExam().getId());
-        Assert.assertEquals("Username không đúng!", user.getUsername(), foundExamUser.getUser().getUsername());
-    }
-    @Test
-    @Transactional
-    public void testFindByExamAndUser_FAIL3() {
-        // Tạo dữ liệu cho Exam
-        Optional<Exam> result = examService.getExamById(195L);
-        Assert.assertTrue("Exam không tồn tại!", result.isPresent());
-        Exam exam = result.get();
-
-        Optional<User> result2 = userService.getUserByUsername("dvcpro");
-        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        ExamUser foundExamUser = examUserService.findByExamAndUser(exam.getId(), user.getUsername());
-        // Kiểm tra rằng ExamUser đã được tìm thấy và đúng với dữ liệu
-        Assert.assertNotNull("User ko tham gia ki thi nay!", foundExamUser);
-        Assert.assertEquals("Exam ID không đúng!", exam.getId(), foundExamUser.getExam().getId());
-        Assert.assertEquals("Username không đúng!", user.getUsername(), foundExamUser.getUser().getUsername());
-    }
-    // TC_ES_13
-    @Test
-    @Transactional
-    public void testUpdateExamUser() {
-        // Tạo dữ liệu cho Exam
-        Optional<Exam> result = examService.getExamById(195L);
-        Assert.assertTrue("Exam không tồn tại!", result.isPresent());
-        Exam exam = result.get();
-
-        Optional<User> result2 = userService.getUserByUsername("1624801040051");
-        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        ExamUser foundExamUser = examUserService.findByExamAndUser(exam.getId(), user.getUsername());
-        // Kiểm tra rằng ExamUser đã được tìm thấy và đúng với dữ liệu
-        Assert.assertNotNull("ExamUser không tồn tại!", foundExamUser);
-        Assert.assertEquals("Exam ID không đúng!", exam.getId(), foundExamUser.getExam().getId());
-        Assert.assertEquals("Username không đúng!", user.getUsername(), foundExamUser.getUser().getUsername());
-
-        foundExamUser.setIsFinished(true);
-        examUserService.update(foundExamUser);
-        Assert.assertTrue("Chua Cap nhat user da hoan thanh bai thi",foundExamUser.getIsFinished());
-    }
-
-    //TC_ES_14
-    @Test
-    @Transactional
-    public void testGetCompleteExams() {
-        // Tạo dữ liệu cho Course
-        Optional<Course> result = courseService.getCourseById(12L);
-        Assert.assertTrue("Course không tồn tại!", result.isPresent());
-        Course course = result.get();
-
-        // Tạo dữ liệu cho User
-        Optional<User> result2 = userService.getUserByUsername("1624801040051");
-        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        List<ExamUser> list = examUserService.getCompleteExams(course.getId(), user.getUsername());
-
-        // Kiểm tra rằng danh sách không rỗng, tức là người dùng tham gia khóa học
-        Assert.assertNotNull("User không tham gia Course này", list);
-        Assert.assertFalse("Danh sách bài thi hoàn thành không thể rỗng!", list.isEmpty());
-
-        // Kiểm tra rằng danh sách chỉ chứa các bài thi đã hoàn thành
-        for (ExamUser examUser : list) {
-            Assert.assertTrue("Bài thi chưa hoàn thành!", examUser.getIsFinished()); // Kiểm tra bài thi đã hoàn thành
-            Assert.assertEquals("User không đúng!", user.getUsername(), examUser.getUser().getUsername());
-        }
-    }
-    @Test
-    @Transactional
-    public void testGetCompleteExams_FAIL1() {
-        // Tạo dữ liệu cho Course
-        Optional<Course> result = courseService.getCourseById(1222L);
-        Assert.assertTrue("Course không tồn tại!", result.isPresent());
-        Course course = result.get();
-
-        // Tạo dữ liệu cho User
-        Optional<User> result2 = userService.getUserByUsername("1624801040051");
-        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        List<ExamUser> list = examUserService.getCompleteExams(course.getId(), user.getUsername());
-
-        // Kiểm tra rằng danh sách không rỗng, tức là người dùng tham gia khóa học
-        Assert.assertNotNull("User không tham gia Course này", list);
-        Assert.assertFalse("Danh sách bài thi hoàn thành không thể rỗng!", list.isEmpty());
-
-        // Kiểm tra rằng danh sách chỉ chứa các bài thi đã hoàn thành
-        for (ExamUser examUser : list) {
-            Assert.assertTrue("Bài thi chưa hoàn thành!", examUser.getIsFinished()); // Kiểm tra bài thi đã hoàn thành
-            Assert.assertEquals("User không đúng!", user.getUsername(), examUser.getUser().getUsername());
+    @Rollback
+    public void testFindAllByCreatedByUsername_validUser() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
+        Page<Exam> page = examService.findAllByCreatedBy_Username(pageable, "user1");
+        for (Exam exam : page) {
+            Assertions.assertEquals("user1", exam.getCreatedBy());
         }
     }
 
+    //    TC_ES_19
+//    Lấy danh sách với username không tồn tại
+//    input: pageable = PageRequest(0,10), username = "nonexistent_user"
+//    output: Trả về Page rỗng
     @Test
-    @Transactional
-    public void testGetCompleteExams_FAIL2() {
-        // Tạo dữ liệu cho Course
-        Optional<Course> result = courseService.getCourseById(12L);
-        Assert.assertTrue("Course không tồn tại!", result.isPresent());
-        Course course = result.get();
-
-        // Tạo dữ liệu cho User
-        Optional<User> result2 = userService.getUserByUsername("1624801040051123");
-        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        List<ExamUser> list = examUserService.getCompleteExams(course.getId(), user.getUsername());
-
-        // Kiểm tra rằng danh sách không rỗng, tức là người dùng tham gia khóa học
-        Assert.assertNotNull("User không tham gia Course này", list);
-        Assert.assertFalse("Danh sách bài thi hoàn thành không thể rỗng!", list.isEmpty());
-
-        // Kiểm tra rằng danh sách chỉ chứa các bài thi đã hoàn thành
-        for (ExamUser examUser : list) {
-            Assert.assertTrue("Bài thi chưa hoàn thành!", examUser.getIsFinished()); // Kiểm tra bài thi đã hoàn thành
-            Assert.assertEquals("User không đúng!", user.getUsername(), examUser.getUser().getUsername());
-        }
+    @Rollback
+    public void testFindAllByCreatedByUsername_nonExistingUser() {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
+        Page<Exam> page = examService.findAllByCreatedBy_Username(pageable, "nonexistent_user");
     }
-
-    @Test
-    @Transactional
-    public void testGetCompleteExams_FAIL3() {
-        // Tạo dữ liệu cho Course
-        Optional<Course> result = courseService.getCourseById(12L);
-        Assert.assertTrue("Course không tồn tại!", result.isPresent());
-        Course course = result.get();
-
-        // Tạo dữ liệu cho User
-        Optional<User> result2 = userService.getUserByUsername("dvcpro");
-        Assert.assertTrue("User không tồn tại!", result2.isPresent());
-        User user = result2.get();
-
-        // Gọi hàm cần test
-        List<ExamUser> list = examUserService.getCompleteExams(course.getId(), user.getUsername());
-
-        // Kiểm tra rằng danh sách không rỗng, tức là người dùng tham gia khóa học
-        Assert.assertNotNull("User Chua Hoan Thanh Coure nay", list);
-        Assert.assertFalse("Danh sách bài thi hoàn thành không thể rỗng!", list.isEmpty());
-
-        // Kiểm tra rằng danh sách chỉ chứa các bài thi đã hoàn thành
-        for (ExamUser examUser : list) {
-            Assert.assertTrue("Bài thi chưa hoàn thành!", examUser.getIsFinished()); // Kiểm tra bài thi đã hoàn thành
-            Assert.assertEquals("User không đúng!", user.getUsername(), examUser.getUser().getUsername());
-        }
-    }
-
-    // TC_ES_15
-    @Test
-    @Transactional
-    public void testFindAllByExam_Id() {
-        // Tạo dữ liệu cho Exam
-        Optional<Exam> result = examService.getExamById(200L);
-        Assert.assertTrue("Exam không tồn tại!", result.isPresent());
-        Exam exam = result.get();
-
-        // Gọi hàm cần test
-        List<ExamUser> examUsers = examUserService.findAllByExam_Id(exam.getId());
-        // Kiểm tra danh sách không rỗng
-        Assert.assertNotNull("Danh sách ExamUser không thể null!", examUsers);
-        Assert.assertFalse("Danh sách ExamUser không thể rỗng!", examUsers.isEmpty());
-        // Kiểm tra từng ExamUser trong danh sách
-        for (ExamUser examUser : examUsers) {
-            // Kiểm tra mỗi ExamUser có examId chính xác
-            Assert.assertEquals("Exam ID không đúng!", exam.getId(), examUser.getExam().getId());
-        }
-
-    }
-    // TC_ES_16
-    @Test
-    @Transactional
-    public void testFindExamUsersByIsFinishedIsTrueAndExam_Id() {
-        // Tạo dữ liệu cho Exam
-        Optional<Exam> result = examService.getExamById(200L);
-        Assert.assertTrue("Exam không tồn tại!", result.isPresent());
-        Exam exam = result.get();
-
-        // Gọi hàm cần test
-        List<ExamUser> completedExamUsers = examUserService.findExamUsersByIsFinishedIsTrueAndExam_Id(exam.getId());
-
-        // Kiểm tra rằng chỉ có ExamUser đã hoàn thành bài thi (isFinished = true) được trả về
-        Assert.assertNotNull("Danh sách ExamUser không thể null!", completedExamUsers);
-        Assert.assertFalse("Danh sách ExamUser không thể rỗng!", completedExamUsers.isEmpty());
-
-        // Kiểm tra rằng tất cả ExamUser trong danh sách đều có isFinished = true
-        for (ExamUser examUser : completedExamUsers) {
-            Assert.assertTrue("ExamUser phải hoàn thành bài thi (isFinished = true)", examUser.getIsFinished());
-            Assert.assertEquals("Exam ID không đúng!", exam.getId(), examUser.getExam().getId());
-        }
-    }
-
-
 
 }
