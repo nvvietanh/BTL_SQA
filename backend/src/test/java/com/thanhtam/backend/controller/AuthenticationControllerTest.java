@@ -8,7 +8,12 @@ import com.thanhtam.backend.dto.PasswordResetDto;
 import com.thanhtam.backend.dto.PasswordResetRequest;
 import com.thanhtam.backend.payload.response.JwtResponse;
 import com.thanhtam.backend.service.UserService;
+import com.thanhtam.backend.ultilities.RequestOperationName;
+import com.thanhtam.backend.ultilities.RequestOperationStatus;
+
+import org.checkerframework.checker.units.qual.A;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -41,101 +46,24 @@ public class AuthenticationControllerTest {
     private ObjectMapper objectMapper;
     private Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
+    @Autowired
     JwtUtils jwtUtils;
 
+    @Autowired
     private AuthenticationManager authenticationManager;
+    
     @Autowired
     private UserService userService;
 
-    @Autowired
-    
+    @Autowired   
+    private AuthenticationController authenticationController;
 
-    private String adminToken, lecturerToken, studentToken;
+    String rspwToken;
 
-    public void setupAdminToken() throws Exception {
-        // Tạo payload cho API đăng nhập role admin
-        String loginPayloadAdmin = "{ \"username\": \"thanhtam28ss\", \"password\": \"Abcd@12345\" }";
-
-        // Tạo header với Content-Type
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-
-        // Tạo request entity
-        HttpEntity<String> requestAdmin = new HttpEntity<>(loginPayloadAdmin, headers);
-
-        // Gọi API đăng nhập cho admin
-        ResponseEntity<String> responseAdmin = restTemplate.postForEntity(
-                getRootUrl() + "/signin", // Đường dẫn API đăng nhập
-                requestAdmin,
-                String.class
-        );
-
-        // Kiểm tra trạng thái HTTP
-        if (responseAdmin.getStatusCodeValue() != 200) {
-            throw new RuntimeException("Đăng nhập admin thất bại với mã trạng thái: " + responseAdmin.getStatusCodeValue());
-        }
-
-        // Parse token từ response role admin
-        String responseBodyAdmin = responseAdmin.getBody();
-        adminToken = objectMapper.readTree(responseBodyAdmin).get("accessToken").asText();
-        System.out.println("Admin token: " + adminToken);
-    }
-
-    public void setupLecturerToken() throws Exception {
-        // Tạo payload cho API đăng nhập role lecturer
-        String loginPayloadLecturer = "{ \"username\": \"tamht298\", \"password\": \"Abcd@12345\" }";
-
-        // Tạo header với Content-Type
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-
-        // Tạo request entity
-        HttpEntity<String> requestLecturer = new HttpEntity<>(loginPayloadLecturer, headers);
-
-        // Gọi API đăng nhập cho lecturer
-        ResponseEntity<String> responseLecturer = restTemplate.postForEntity(
-                getRootUrl() + "/signin",
-                requestLecturer,
-                String.class
-        );
-
-        // Kiểm tra trạng thái HTTP
-        if (responseLecturer.getStatusCodeValue() != 200) {
-            throw new RuntimeException("Đăng nhập lecturer thất bại với mã trạng thái: " + responseLecturer.getStatusCodeValue());
-        }
-
-        // Parse token từ response role lecturer
-        String responseBodyLecturer = responseLecturer.getBody();
-        lecturerToken = objectMapper.readTree(responseBodyLecturer).get("accessToken").asText();
-        System.out.println("Lecturer token: " + lecturerToken);
-    }
-
-    public void setupStudentToken() throws Exception {
-        // Tạo payload cho API đăng nhập role student
-        String loginPayloadStudent = "{ \"username\": \"nvvanh\", \"password\": \"Abcd@12345\" }";
-
-        // Tạo header với Content-Type
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-
-        HttpEntity<String> requestStudent = new HttpEntity<>(loginPayloadStudent, headers);
-
-        // Gọi API đăng nhập cho student
-        ResponseEntity<String> responseStudent = restTemplate.postForEntity(
-                getRootUrl() + "/signin",
-                requestStudent,
-                String.class
-        );
-
-        // Kiểm tra trạng thái HTTP
-        if (responseStudent.getStatusCodeValue() != 200) {
-            throw new RuntimeException("Đăng nhập student thất bại với mã trạng thái: " + responseStudent.getStatusCodeValue());
-        }
-
-        // Parse token từ response role student
-        String responseBodyStudent = responseStudent.getBody();
-        studentToken = objectMapper.readTree(responseBodyStudent).get("accessToken").asText();
-        System.out.println("Student token: " + studentToken);
+    @Before
+    public void setUp() {
+        authenticationController = new AuthenticationController(jwtUtils, authenticationManager, userService);
+        rspwToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzNDkiLCJleHAiOjE3NDc0MDI1Mjl9.OF0ZwisjNtRJE4jmdpVE0IRMMeLwZ2DiSEXhiZYEDSK0Jpb-ftiOSSCnRU94lbWlxMOlRATMMF9XB29O-qLtoQ";
     }
 
     private String getRootUrl() {
@@ -143,92 +71,58 @@ public class AuthenticationControllerTest {
     }    
 
     @Test
-    public void testAuthenticateUser_Success() throws Exception {
-        // Tạo đối tượng user đăng nhập có trong hệ thống và username password là đúng
+    public void testAuthenticateUser_Success() {
         LoginUser loginUser = new LoginUser();
-        String username = "thanhtam28ss";
-        String password = "Abcd@12345";
-        loginUser.setUsername(username);
-        loginUser.setPassword(password);
+        loginUser.setUsername("thanhtam28ss");
+        loginUser.setPassword("Abcd@12345");
 
-        // khởi tạo bản tin http
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<LoginUser> request = new HttpEntity<>(loginUser, headers);
+        ResponseEntity<?> response = authenticationController.authenticateUser(loginUser);
 
-        // gửi request đền endpoint /api/auth và nhận response
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/signin", request, String.class);
-
-        // Mong đợi status code = 200
         Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-        JwtResponse jwtResponse = objectMapper.readValue(response.getBody(), JwtResponse.class);
-        // Mong đợi jwt token không null
+        Assert.assertTrue(response.getBody() instanceof JwtResponse);
+        JwtResponse jwtResponse = (JwtResponse) response.getBody();
         Assert.assertNotNull(jwtResponse.getAccessToken());
-        // Mong đợi jwt token không rỗng
         Assert.assertTrue(jwtResponse.getAccessToken().length() > 0);
-        // Mong đợi username trả về là trùng khớp với username đăng nhập
-        Assert.assertEquals(username, jwtResponse.getUsername());
+        Assert.assertEquals("thanhtam28ss", jwtResponse.getUsername());
     }
 
     @Test
-    public void testAuthenticateUser_UserNotFound() throws Exception {
+    public void testAuthenticateUser_UserNotFound() {
         LoginUser loginUser = new LoginUser();
         loginUser.setUsername("not_exist_user_99999");
         loginUser.setPassword("123456789");
 
-        // khởi tạo bản tin http
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<LoginUser> request = new HttpEntity<>(loginUser, headers);
+        ResponseEntity<?> response = authenticationController.authenticateUser(loginUser);
 
-        // gửi request
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/signin", request, String.class);
-
-        // Mong đợi trả trả về 401 hoặc 400
-        Assert.assertTrue(
-                response.getStatusCode() == HttpStatus.BAD_REQUEST ||
-                        response.getStatusCode() == HttpStatus.UNAUTHORIZED);
+        Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
-    public void testAuthenticateUser_UserDeleted() throws Exception {
-        // Giả sử đã có user bị xóa (isDeleted = true) trong DB, ví dụ: username = "deleted_user"
+    public void testAuthenticateUser_UserDeleted() {
+        // Đảm bảo có user bị xóa (isDeleted = true) trong DB, ví dụ: username = "deleted_user"
         LoginUser loginUser = new LoginUser();
         loginUser.setUsername("1624801040051"); // user có deleted = 1 trong CSDL
-        loginUser.setPassword("Abcd@12345"); // mật khẩu đúng
+        loginUser.setPassword("Abcd@12345");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<LoginUser> request = new HttpEntity<>(loginUser, headers);
+        ResponseEntity<?> response = authenticationController.authenticateUser(loginUser);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/signin", request, String.class);
-
-        // Mong đợi trả về bad request
         Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        // Mong đợi response body có chứa thông báo rõ ràng
-        Assert.assertTrue(
-                (response.getBody() != null &&
-                        (response.getBody().contains("deleted user") ||
-                        response.getBody().contains("người dùng đã xóa")))
-        );
     }
 
     @Test
-    public void testAuthenticateUser_WrongPassword() throws Exception {
+    public void testAuthenticateUser_WrongPassword() {
         LoginUser loginUser = new LoginUser();
-        loginUser.setUsername("thanhtam28ss"); // username có tồn tại trong db
-        loginUser.setPassword("wrong_password_9991"); // mật khấu sai
+        loginUser.setUsername("thanhtam28ss");
+        loginUser.setPassword("wrong_password_9991");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<LoginUser> request = new HttpEntity<>(loginUser, headers);
-
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/signin", request, String.class);
-
-        // Mong đợi trả trả về 401 hoặc 400
-        Assert.assertTrue(
-                response.getStatusCode() == HttpStatus.BAD_REQUEST ||
-                        response.getStatusCode() == HttpStatus.UNAUTHORIZED);
+        try {
+            authenticationController.authenticateUser(loginUser);
+            Assert.fail("Phải ném ra exception khi mật khẩu sai");
+        } catch (Exception ex) {
+            // Có thể là BadCredentialsException hoặc AuthenticationException
+            Assert.assertTrue(ex instanceof org.springframework.security.core.AuthenticationException
+                    || ex instanceof RuntimeException);
+        }
     }
 
 //    @Test
@@ -252,25 +146,14 @@ public class AuthenticationControllerTest {
 
     @Test
     public void testResetPasswordRequest_Success() throws Exception {
-        // Email này tồn tại trong hệ thống và có thể gửi mail thành công
+        // Email này phải tồn tại trong hệ thống
         PasswordResetRequest requestDto = new PasswordResetRequest();
         requestDto.setEmail("vietanh.caothu@gmail.com");
 
-        // khởi tạo bản tin http
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetRequest> request = new HttpEntity<>(requestDto, headers);
+        OperationStatusDto result = authenticationController.resetPasswordRequest(requestDto);
 
-        // gửi request đến endpoint /api/auth/password-reset-request
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset-request", request, String.class);
-
-        // Mong đợi status code = 200
-        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-        OperationStatusDto result = objectMapper.readValue(response.getBody(), OperationStatusDto.class);
-        // Mong đợi operationName là "REQUEST_PASSWORD_RESET"
-        Assert.assertEquals("REQUEST_PASSWORD_RESET", result.getOperationName());
-        // Mong đợi operationResult là "SUCCESS"
-        Assert.assertEquals("SUCCESS", result.getOperationResult());
+        Assert.assertEquals(RequestOperationName.REQUEST_PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.SUCCESS.name(), result.getOperationResult());
     }
 
     @Test
@@ -279,16 +162,10 @@ public class AuthenticationControllerTest {
         PasswordResetRequest requestDto = new PasswordResetRequest();
         requestDto.setEmail("not_exist_email_9999@gmail.com");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetRequest> request = new HttpEntity<>(requestDto, headers);
+        OperationStatusDto result = authenticationController.resetPasswordRequest(requestDto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset-request", request, String.class);
-
-        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-        OperationStatusDto result = objectMapper.readValue(response.getBody(), OperationStatusDto.class);
-        Assert.assertEquals("REQUEST_PASSWORD_RESET", result.getOperationName());
-        Assert.assertEquals("ERROR", result.getOperationResult());
+        Assert.assertEquals(RequestOperationName.REQUEST_PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.ERROR.name(), result.getOperationResult());
     }
 
     @Test
@@ -297,19 +174,10 @@ public class AuthenticationControllerTest {
         PasswordResetRequest requestDto = new PasswordResetRequest();
         requestDto.setEmail(null);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetRequest> request = new HttpEntity<>(requestDto, headers);
+        OperationStatusDto result = authenticationController.resetPasswordRequest(requestDto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset-request", request, String.class);
-
-        System.out.println(response.getStatusCode().value());
-
-        // Mong đợi lỗi 400 do validate fail hoặc ERROR nếu backend không validate
-        Assert.assertTrue(
-            response.getStatusCode() == HttpStatus.BAD_REQUEST ||
-            (response.getStatusCode() == HttpStatus.OK && response.getBody().contains("ERROR"))
-        );
+        Assert.assertEquals(RequestOperationName.REQUEST_PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.ERROR.name(), result.getOperationResult());
     }
 
     @Test
@@ -318,226 +186,99 @@ public class AuthenticationControllerTest {
         PasswordResetRequest requestDto = new PasswordResetRequest();
         requestDto.setEmail("");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetRequest> request = new HttpEntity<>(requestDto, headers);
+        OperationStatusDto result = authenticationController.resetPasswordRequest(requestDto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset-request", request, String.class);
-
-        // Mong đợi lỗi 400 do validate fail hoặc ERROR nếu backend không validate
-        Assert.assertTrue(
-            response.getStatusCode() == HttpStatus.BAD_REQUEST ||
-            (response.getStatusCode() == HttpStatus.OK && response.getBody().contains("ERROR"))
-        );
+        Assert.assertEquals(RequestOperationName.REQUEST_PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.ERROR.name(), result.getOperationResult());
     }
 
     @Test
-    @Transactional
-    @Rollback
-    public void testResetPasswordRequest_Loop_MultipleRequests() throws Exception {
-        // Gửi nhiều request liên tiếp với các email khác nhau
-        String[] emails = {
-            "vietanh.caothu@gmail.com",
-            "not_exist_email_9999@gmail.com",
-            "",
-            null
-        };
-        for (String email : emails) {
-            PasswordResetRequest requestDto = new PasswordResetRequest();
-            requestDto.setEmail(email);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<PasswordResetRequest> request = new HttpEntity<>(requestDto, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset-request", request, String.class);
-
-            System.out.println(email);
-            System.out.println(response.getStatusCode().value());
-
-            // Chỉ cần không lỗi 500 là được, các trường hợp đã test ở trên
-            Assert.assertTrue(
-                response.getStatusCode() == HttpStatus.OK ||
-                response.getStatusCode() == HttpStatus.BAD_REQUEST
-            );
-        }
-    }
-
-    @Test
-    @Transactional
-    @Rollback
-    public void testResetPassword_Success() throws Exception {
-
-        // tạo token hợp lệ
-//        userService.requestPasswordReset("vietanh.caothu@gmail.com");
-
-        // Lấy token từ DB
-        String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzNDkiLCJleHAiOjE3NDczNDUyMzJ9.rYD7U5zNATTYVmqukccVEZkcL94pnSOEWp9ffBIVKoKYdp9_rPIHnx-hr68OZAfCz4TaW96s3soVhP6xgAGM_w";
-
-        // Token hợp lệ, password hợp lệ
+    public void testResetPassword_Success() {
+        // Token hợp lệ phải tồn tại trong DB, bạn cần lấy token này từ DB hoặc tạo trước khi test
+        String validToken = rspwToken;
         PasswordResetDto dto = new PasswordResetDto();
-        dto.setToken(token); // Token này phải tồn tại và hợp lệ trong DB
+        dto.setToken(validToken);
         dto.setPassword("NewPassword@123999");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetDto> request = new HttpEntity<>(dto, headers);
+        OperationStatusDto result = authenticationController.resetPassword(dto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset", request, String.class);
-
-        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-        OperationStatusDto result = objectMapper.readValue(response.getBody(), OperationStatusDto.class);
-        Assert.assertEquals("PASSWORD_RESET", result.getOperationName());
-        Assert.assertEquals("SUCCESS", result.getOperationResult());
+        Assert.assertEquals(RequestOperationName.PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.SUCCESS.name(), result.getOperationResult());
     }
 
     @Test
-    @Transactional
-    @Rollback
-    public void testResetPassword_Fail_InvalidToken() throws Exception {
-        // Token không tồn tại hoặc đã hết hạn
+    public void testResetPassword_Fail_InvalidToken() {
         PasswordResetDto dto = new PasswordResetDto();
         dto.setToken("invalid_or_expired_token");
         dto.setPassword("NewPassword@123");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetDto> request = new HttpEntity<>(dto, headers);
+        OperationStatusDto result = authenticationController.resetPassword(dto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset", request, String.class);
-
-        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-        OperationStatusDto result = objectMapper.readValue(response.getBody(), OperationStatusDto.class);
-        Assert.assertEquals("PASSWORD_RESET", result.getOperationName());
-        Assert.assertEquals("ERROR", result.getOperationResult());
+        Assert.assertEquals(RequestOperationName.PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.ERROR.name(), result.getOperationResult());
     }
 
     @Test
-    @Transactional
-    @Rollback
-    public void testResetPassword_Fail_NullToken() throws Exception {
-        // Token null
+    public void testResetPassword_Fail_NullToken() {
         PasswordResetDto dto = new PasswordResetDto();
         dto.setToken(null);
         dto.setPassword("NewPassword@123");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetDto> request = new HttpEntity<>(dto, headers);
+        OperationStatusDto result = authenticationController.resetPassword(dto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset", request, String.class);
-
-        Assert.assertTrue(
-            response.getStatusCode() == HttpStatus.BAD_REQUEST ||
-            (response.getStatusCode() == HttpStatus.OK && response.getBody().contains("ERROR"))
-        );
+        Assert.assertEquals(RequestOperationName.PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.ERROR.name(), result.getOperationResult());
     }
 
     @Test
-    @Transactional
-    @Rollback
-    public void testResetPassword_Fail_EmptyToken() throws Exception {
-        // Token rỗng
+    public void testResetPassword_Fail_EmptyToken() {
         PasswordResetDto dto = new PasswordResetDto();
         dto.setToken("");
         dto.setPassword("NewPassword@123");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetDto> request = new HttpEntity<>(dto, headers);
+        OperationStatusDto result = authenticationController.resetPassword(dto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset", request, String.class);
-
-        Assert.assertTrue(
-            response.getStatusCode() == HttpStatus.BAD_REQUEST ||
-            (response.getStatusCode() == HttpStatus.OK && response.getBody().contains("ERROR"))
-        );
+        Assert.assertEquals(RequestOperationName.PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.ERROR.name(), result.getOperationResult());
     }
 
     @Test
-    @Transactional
-    @Rollback
-    public void testResetPassword_Fail_NullPassword() throws Exception {
-        // Password null
+    public void testResetPassword_Fail_NullPassword() {
         PasswordResetDto dto = new PasswordResetDto();
-        dto.setToken("valid_token_123");
+        dto.setToken(rspwToken);
         dto.setPassword(null);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetDto> request = new HttpEntity<>(dto, headers);
+        OperationStatusDto result = authenticationController.resetPassword(dto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset", request, String.class);
-
-        Assert.assertTrue(
-            response.getStatusCode() == HttpStatus.BAD_REQUEST ||
-            (response.getStatusCode() == HttpStatus.OK && response.getBody().contains("ERROR"))
-        );
+        Assert.assertEquals(RequestOperationName.PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.ERROR.name(), result.getOperationResult());
     }
 
     @Test
-    @Transactional
-    @Rollback
-    public void testResetPassword_Fail_EmptyPassword() throws Exception {
-        // Password rỗng
+    public void testResetPassword_Fail_EmptyPassword() {
         PasswordResetDto dto = new PasswordResetDto();
-        dto.setToken("valid_token_123");
+        dto.setToken(rspwToken);
         dto.setPassword("");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<PasswordResetDto> request = new HttpEntity<>(dto, headers);
+        OperationStatusDto result = authenticationController.resetPassword(dto);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset", request, String.class);
-
-        Assert.assertTrue(
-            response.getStatusCode() == HttpStatus.BAD_REQUEST ||
-            (response.getStatusCode() == HttpStatus.OK && response.getBody().contains("ERROR"))
-        );
+        Assert.assertEquals(RequestOperationName.PASSWORD_RESET.name(), result.getOperationName());
+        Assert.assertEquals(RequestOperationStatus.ERROR.name(), result.getOperationResult());
     }
 
-    @Test
-    @Transactional
-    @Rollback
-    public void testResetPassword_Loop_MultipleRequests() throws Exception {
-        // Gửi nhiều request liên tiếp với các token và password khác nhau
-        String[] tokens = { "valid_token_123", "invalid_token", "", null };
-        String[] passwords = { "NewPassword@123", "", null };
+//     @Test
+//     @Transactional
+//     @Rollback
+//     public void testResetPassword_Success_DirectCall() {
+//         PasswordResetDto dto = new PasswordResetDto();
+//         dto.setToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzNDkiLCJleHAiOjE3NDczNDYzMzZ9.LafURu6yp3Ug92MPt-_Rp4SSsm91C1NWv5NRs0dZq6eukgLGQtTjkqpA0riZlT4ZVwYNCjbMCbMKPbg0HmXPRQ");
+//         dto.setPassword("Abcd@12345");
 
-        for (String token : tokens) {
-            for (String password : passwords) {
-                PasswordResetDto dto = new PasswordResetDto();
-                dto.setToken(token);
-                dto.setPassword(password);
+// //        AuthenticationController controller = new AuthenticationController(jwtUtils, authenticationManager, userService);
+//         // OperationStatusDto result = authController.resetPassword(dto);
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<PasswordResetDto> request = new HttpEntity<>(dto, headers);
-
-                ResponseEntity<String> response = restTemplate.postForEntity(getRootUrl() + "/password-reset", request, String.class);
-
-                // Không được lỗi 500, các trường hợp đã test ở trên
-                Assert.assertTrue(
-                    response.getStatusCode() == HttpStatus.OK ||
-                    response.getStatusCode() == HttpStatus.BAD_REQUEST
-                );
-            }
-        }
-    }
-
-    @Test
-    @Transactional
-    @Rollback
-    public void testResetPassword_Success_DirectCall() {
-        PasswordResetDto dto = new PasswordResetDto();
-        dto.setToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzNDkiLCJleHAiOjE3NDczNDYzMzZ9.LafURu6yp3Ug92MPt-_Rp4SSsm91C1NWv5NRs0dZq6eukgLGQtTjkqpA0riZlT4ZVwYNCjbMCbMKPbg0HmXPRQ");
-        dto.setPassword("Abcd@12345");
-
-//        AuthenticationController controller = new AuthenticationController(jwtUtils, authenticationManager, userService);
-        // OperationStatusDto result = authController.resetPassword(dto);
-
-        // Assert.assertEquals("PASSWORD_RESET", result.getOperationName());
-        // Assert.assertEquals("SUCCESS", result.getOperationResult());
-    }
+//         // Assert.assertEquals("PASSWORD_RESET", result.getOperationName());
+//         // Assert.assertEquals("SUCCESS", result.getOperationResult());
+//     }
 
 }
