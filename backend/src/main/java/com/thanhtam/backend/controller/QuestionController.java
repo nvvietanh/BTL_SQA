@@ -42,7 +42,6 @@ public class QuestionController {
 
     @GetMapping(value = "/questions")
     @PreAuthorize("hasRole('ADMIN') or hasRole('LECTURER')")
-
     public ResponseEntity<ServiceResult> getAllQuestion() {
         List<Question> questionList = questionService.getQuestionList();
         log.info(questionList.toString());
@@ -51,7 +50,6 @@ public class QuestionController {
 
     @GetMapping(value = "/questions/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('LECTURER')")
-
     public ResponseEntity<?> getQuestionById(@PathVariable Long id) {
         Optional<Question> questionOptional = questionService.getQuestionById(id);
         if (!questionOptional.isPresent()) {
@@ -114,7 +112,6 @@ public class QuestionController {
 
     @GetMapping(value = "/question-types/{typeId}/questions")
     @PreAuthorize("hasRole('ADMIN') or hasRole('LECTURER')")
-
     public ResponseEntity<?> getQuestionByQuestionType(@PathVariable Long typeId) {
         if (questionTypeService.existsById(typeId)) {
 
@@ -143,7 +140,6 @@ public class QuestionController {
 
     @PutMapping(value = "/questions/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('LECTURER')")
-
     public ResponseEntity<?> updateQuestion(@Valid @RequestBody Question question, @PathVariable Long id) {
         Optional<Question> questionReq = questionService.getQuestionById(id);
         if (!questionReq.isPresent()) {

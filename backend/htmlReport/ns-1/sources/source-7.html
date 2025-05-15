@@ -1,0 +1,335 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > FileAWSController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.thanhtam.backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: FileAWSController (com.thanhtam.backend.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FileAWSController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20%
+  </span>
+  <span class="absValue">
+    (1/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    10.3%
+  </span>
+  <span class="absValue">
+    (4/39)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.thanhtam.backend.controller;
+&nbsp;
+&nbsp;import com.google.common.io.Files;
+&nbsp;import com.thanhtam.backend.entity.User;
+&nbsp;import com.thanhtam.backend.service.CloudinaryService;
+&nbsp;import com.thanhtam.backend.service.S3Services;
+&nbsp;import com.thanhtam.backend.service.UserService;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.http.HttpHeaders;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.io.ByteArrayOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@CrossOrigin(origins = &quot;*&quot;, maxAge = 3600)
+&nbsp;@RequestMapping(value = &quot;/api/aws&quot;)
+&nbsp;public class FileAWSController {
+&nbsp;
+&nbsp;    // Amazon S3
+&nbsp;//    S3Services s3Services;
+&nbsp;    UserService userService;
+&nbsp;
+&nbsp;    // Cloudinary
+&nbsp;    private final CloudinaryService cloudinaryService;
+&nbsp;    
+&nbsp;
+<b class="fc">&nbsp;    Logger logger = LoggerFactory.getLogger(FileAWSController.class);</b>
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public FileAWSController(CloudinaryService cloudinaryService, S3Services s3Services, UserService userService) {</b>
+&nbsp;//        this.s3Services = s3Services;
+<b class="fc">&nbsp;        this.cloudinaryService = cloudinaryService;</b>
+<b class="fc">&nbsp;        this.userService = userService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Value(&quot;${isc.s3.bucket}&quot;)
+&nbsp;    private String bucketName;
+&nbsp;
+&nbsp;    @Value(&quot;${isc.aws.endpointUrl}&quot;)
+&nbsp;    private String endpointUrl;
+&nbsp;
+&nbsp;
+&nbsp;//    /**
+&nbsp;//     * Upload file
+&nbsp;//     *
+&nbsp;//     * @param file
+&nbsp;//     * @return keyName
+&nbsp;//     */
+&nbsp;//
+&nbsp;//    @PostMapping(&quot;/file/upload&quot;)
+&nbsp;//    public String uploadMultipartFile(@RequestParam(&quot;file&quot;) MultipartFile file, @RequestParam String fileAs) {
+&nbsp;//        String keyName = &quot;&quot;;
+&nbsp;//        switch (fileAs) {
+&nbsp;//            case &quot;avatar&quot;: {
+&nbsp;//                String extension = Files.getFileExtension(file.getOriginalFilename());
+&nbsp;//                String username = userService.getUserName();
+&nbsp;//                keyName = username.concat(&quot;-avatar.&quot;).concat(extension);
+&nbsp;//                s3Services.uploadS3File(keyName, file);
+&nbsp;//                User user = userService.getUserByUsername(username).get();
+&nbsp;//                String avatarUrl = endpointUrl + &quot;/&quot; + bucketName + &quot;/&quot; + keyName;
+&nbsp;//                user.getProfile().setImage(avatarUrl);
+&nbsp;//                return avatarUrl;
+&nbsp;//            }
+&nbsp;//            case &quot;course&quot;: {
+&nbsp;//                keyName = new Date().toString().concat(file.getOriginalFilename());
+&nbsp;//
+&nbsp;//            }
+&nbsp;//            default: {
+&nbsp;//                keyName = file.getOriginalFilename();
+&nbsp;//                break;
+&nbsp;//            }
+&nbsp;//        }
+&nbsp;//
+&nbsp;//        s3Services.uploadS3File(keyName, file);
+&nbsp;//
+&nbsp;//        return endpointUrl + &quot;/&quot; + bucketName + &quot;/&quot; + keyName;
+&nbsp;//    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Upload file
+&nbsp;     *
+&nbsp;     * @param file
+&nbsp;     * @param fileAs
+&nbsp;     * @return URL c?a file ?ã upload
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/file/upload&quot;)
+&nbsp;    public String uploadMultipartFile(@RequestParam(&quot;file&quot;) MultipartFile file, @RequestParam String fileAs) {
+<b class="nc">&nbsp;        String folder = fileAs.equals(&quot;avatar&quot;) ? &quot;avatars&quot; : &quot;courses&quot;;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            String url = cloudinaryService.uploadFile(file, folder);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (fileAs.equals(&quot;avatar&quot;)) {</b>
+<b class="nc">&nbsp;                String username = userService.getUserName();</b>
+<b class="nc">&nbsp;                User user = userService.getUserByUsername(username).orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</b>
+<b class="nc">&nbsp;                user.getProfile().setImage(url);</b>
+<b class="nc">&nbsp;                userService.updateUser(user);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            return url;</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Error uploading file: {}&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Could not upload file: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/file/upload/course&quot;)
+&nbsp;    public String uploadCourseImg(@RequestParam(&quot;file&quot;) MultipartFile file) {
+<b class="nc">&nbsp;        String keyName = new Date().toString().concat(file.getOriginalFilename());</b>
+&nbsp;
+&nbsp;//        s3Services.uploadS3File(keyName, file);
+&nbsp;        try {
+<b class="nc">&nbsp;            String url = cloudinaryService.uploadFile(file, &quot;courses&quot;);</b>
+<b class="nc">&nbsp;            return url;</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Error uploading file: {}&quot;, e.getMessage());</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Could not upload file: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;//        return endpointUrl + &quot;/&quot; + bucketName + &quot;/&quot; + keyName;
+&nbsp;    }
+&nbsp;//
+&nbsp;    @PostMapping(&quot;/file/upload/avatar&quot;)
+&nbsp;    public String uploadMultipartFile(@RequestParam(&quot;file&quot;) MultipartFile file) throws Exception {
+<b class="nc">&nbsp;        String username = userService.getUserName();</b>
+&nbsp;        /*
+&nbsp;        Get url image of user if exists
+&nbsp;         */
+<b class="nc">&nbsp;        final String imgUrlUser = userService.getUserByUsername(username).get().getProfile().getImage();</b>
+<b class="nc">&nbsp;        String extension = Files.getFileExtension(file.getOriginalFilename());</b>
+<b class="nc">&nbsp;        String keyName = new Date().getTime() + &quot;_&quot; + username + &quot;_avatar.&quot; + extension;</b>
+&nbsp;        try {
+&nbsp;//            s3Services.uploadS3File(keyName, file);
+&nbsp;//            String avatarUrl = endpointUrl + &quot;/&quot; + bucketName + &quot;/&quot; + keyName;
+<b class="nc">&nbsp;            String avatarUrl = cloudinaryService.uploadFile(file, &quot;avatars&quot;);</b>
+&nbsp;
+&nbsp;//            if (!imgUrlUser.isEmpty()) {
+&nbsp;//                String fileName = imgUrlUser.replace(endpointUrl + &quot;/&quot; + bucketName + &quot;/&quot;, &quot;&quot;);
+&nbsp;//                s3Services.deleteFile(fileName);
+&nbsp;//            }
+<b class="nc">&nbsp;            User user = userService.getUserByUsername(username).get();</b>
+<b class="nc">&nbsp;            user.getProfile().setImage(avatarUrl);</b>
+<b class="nc">&nbsp;            userService.updateUser(user);</b>
+<b class="nc">&nbsp;            return avatarUrl;</b>
+&nbsp;
+<b class="nc">&nbsp;        } catch (Exception exception) {</b>
+<b class="nc">&nbsp;            throw new Exception(exception.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;//
+&nbsp;//
+&nbsp;//
+&nbsp;//    /*
+&nbsp;//     * Download Files
+&nbsp;//     */
+&nbsp;//    @GetMapping(&quot;/file/{keyName}&quot;)
+&nbsp;//    // public ResponseEntity&lt;byte[]&gt; downloadFile(@PathVariable String keyName) {
+&nbsp;//    //     ByteArrayOutputStream downloadInputStream = s3Services.downloadS3File(keyName);
+&nbsp;//
+&nbsp;//    //     return ResponseEntity.ok()
+&nbsp;//    //             .contentType(contentType(keyName))
+&nbsp;//    //             .header(HttpHeaders.CONTENT_DISPOSITION, &quot;attachment; filename=\&quot;&quot; + keyName + &quot;\&quot;&quot;)
+&nbsp;//    //             .body(downloadInputStream.toByteArray());
+&nbsp;//    // }
+&nbsp;//    public ResponseEntity&lt;String&gt; downloadFile(@PathVariable String publicId) {
+&nbsp;//    try {
+&nbsp;//        String fileUrl = cloudinaryService.getFileUrl(publicId);
+&nbsp;//        return ResponseEntity.ok(fileUrl);
+&nbsp;//    } catch (Exception e) {
+&nbsp;//        logger.error(&quot;Error retrieving file: {}&quot;, e.getMessage());
+&nbsp;//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+&nbsp;//                .body(&quot;Could not retrieve file: &quot; + e.getMessage());
+&nbsp;//    }
+&nbsp;//}
+&nbsp;
+&nbsp;//    /*
+&nbsp;//     * List ALL Files
+&nbsp;//     */
+&nbsp;//    @GetMapping(&quot;/file/all&quot;)
+&nbsp;//    public List&lt;String&gt; listAllFiles() {
+&nbsp;//        return s3Services.listS3Files();
+&nbsp;//    }
+&nbsp;
+&nbsp;    private MediaType contentType(String keyName) {
+<b class="nc">&nbsp;        String[] arr = keyName.split(&quot;\\.&quot;);</b>
+<b class="nc">&nbsp;        String type = arr[arr.length - 1];</b>
+<b class="nc">&nbsp;        switch (type) {</b>
+&nbsp;            case &quot;txt&quot;:
+<b class="nc">&nbsp;                return MediaType.TEXT_PLAIN;</b>
+&nbsp;            case &quot;png&quot;:
+<b class="nc">&nbsp;                return MediaType.IMAGE_PNG;</b>
+&nbsp;            case &quot;jpg&quot;:
+<b class="nc">&nbsp;                return MediaType.IMAGE_JPEG;</b>
+&nbsp;            default:
+<b class="nc">&nbsp;                return MediaType.APPLICATION_OCTET_STREAM;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;//    /**
+&nbsp;//     * @param keyName
+&nbsp;//     * @return
+&nbsp;//     */
+&nbsp;//    @DeleteMapping(value = &quot;/delete&quot;)
+&nbsp;//    public ResponseEntity&lt;String&gt; deleteFile(@RequestParam(value = &quot;fileName&quot;) final String keyName) {
+&nbsp;//        s3Services.deleteFile(keyName);
+&nbsp;//        final String response = &quot;[&quot; + keyName + &quot;] deleted successfully.&quot;;
+&nbsp;//        return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);
+&nbsp;//    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-05-15 11:25</div>
+</div>
+</body>
+</html>

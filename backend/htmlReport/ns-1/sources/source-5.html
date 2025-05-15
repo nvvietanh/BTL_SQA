@@ -1,0 +1,784 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ExamController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.thanhtam.backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: ExamController (com.thanhtam.backend.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ExamController</td>
+<td class="coverageStat">
+  <span class="percent">
+    4.3%
+  </span>
+  <span class="absValue">
+    (1/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/98)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    2.9%
+  </span>
+  <span class="absValue">
+    (9/310)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ExamController$$EnhancerBySpringCGLIB$$3c5478a7</td>
+  </tr>
+  <tr>
+    <td class="name">ExamController$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ExamController$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ExamController$3</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ExamController$4</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ExamController$5</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    3.6%
+  </span>
+  <span class="absValue">
+    (1/28)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/98)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    2.9%
+  </span>
+  <span class="absValue">
+    (9/315)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.thanhtam.backend.controller;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.core.JsonProcessingException;
+&nbsp;import com.fasterxml.jackson.core.type.TypeReference;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.google.common.base.Strings;
+&nbsp;import com.thanhtam.backend.dto.*;
+&nbsp;import com.thanhtam.backend.entity.*;
+&nbsp;import com.thanhtam.backend.service.*;
+&nbsp;import com.thanhtam.backend.ultilities.ERole;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.web.PageableDefault;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import javax.persistence.EntityNotFoundException;
+&nbsp;import javax.validation.Valid;
+&nbsp;import javax.xml.transform.Result;
+&nbsp;import java.io.IOException;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.text.DateFormat;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.text.SimpleDateFormat;
+&nbsp;import java.util.*;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@CrossOrigin(origins = &quot;*&quot;, maxAge = 3600)
+&nbsp;@RequestMapping(value = &quot;/api&quot;)
+&nbsp;public class ExamController {
+<b class="fc">&nbsp;    Logger logger = LoggerFactory.getLogger(ExamController.class);</b>
+&nbsp;
+&nbsp;    private ExamService examService;
+&nbsp;    private QuestionService questionService;
+&nbsp;    private UserService userService;
+&nbsp;    private IntakeService intakeService;
+&nbsp;    private PartService partService;
+&nbsp;    private ExamUserService examUserService;
+&nbsp;    private ObjectMapper mapper;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public ExamController(ExamService examService, QuestionService questionService, UserService userService, IntakeService intakeService, PartService partService, ExamUserService examUserService, ObjectMapper mapper) {</b>
+<b class="fc">&nbsp;        this.examService = examService;</b>
+<b class="fc">&nbsp;        this.questionService = questionService;</b>
+<b class="fc">&nbsp;        this.userService = userService;</b>
+<b class="fc">&nbsp;        this.intakeService = intakeService;</b>
+<b class="fc">&nbsp;        this.partService = partService;</b>
+<b class="fc">&nbsp;        this.examUserService = examUserService;</b>
+<b class="fc">&nbsp;        this.mapper = mapper;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;//    @GetMapping(value = &quot;/exams&quot;)
+&nbsp;//    public ResponseEntity&lt;List&lt;Exam&gt;&gt; getAll() {
+&nbsp;//        List&lt;Exam&gt; exams = examService.getAll();
+&nbsp;//        if (exams.isEmpty()) {
+&nbsp;//            return new ResponseEntity&lt;&gt;(HttpStatus.NO_CONTENT);
+&nbsp;//        }
+&nbsp;//        return new ResponseEntity&lt;&gt;(exams, HttpStatus.OK);
+&nbsp;//    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;    public PageResult getExamsByPage(@PageableDefault(page = 0, size = 10, sort = &quot;id&quot;) Pageable pageable) {
+<b class="nc">&nbsp;        String username = userService.getUserName();</b>
+<b class="nc">&nbsp;        User user = userService.getUserByUsername(username).get();</b>
+<b class="nc">&nbsp;        boolean isAdmin = user.getRoles().contains(ERole.ROLE_ADMIN);</b>
+&nbsp;        Page&lt;Exam&gt; examPage;
+<b class="nc">&nbsp;        if (isAdmin) {</b>
+<b class="nc">&nbsp;            examPage = examService.findAll(pageable);</b>
+<b class="nc">&nbsp;            return new PageResult(examPage);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        examPage = examService.findAllByCreatedBy_Username(pageable, username);</b>
+<b class="nc">&nbsp;        return new PageResult(examPage);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/list-all-by-user&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;ExamUser&gt;&gt; getAllByUser() {
+<b class="nc">&nbsp;        Authentication auth = SecurityContextHolder.getContext().getAuthentication();</b>
+<b class="nc">&nbsp;        String username = auth.getName();</b>
+<b class="nc">&nbsp;        logger.error(username);</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ExamUser&gt; examUserList = examUserService.getExamListByUsername(username);</b>
+<b class="nc">&nbsp;        Date currentDate = new Date();</b>
+<b class="nc">&nbsp;        examUserList.forEach(examUser -&gt; {</b>
+<b class="nc">&nbsp;            if (currentDate.compareTo(examUser.getExam().getBeginExam()) &lt; 0) {</b>
+<b class="nc">&nbsp;                examUser.getExam().setLocked(false);</b>
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                examUser.getExam().setLocked(true);</b>
+&nbsp;
+&nbsp;            }
+&nbsp;        });
+<b class="nc">&nbsp;        return new ResponseEntity(examUserList, HttpStatus.OK);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/exam-user/{examId}&quot;)
+&nbsp;    public ResponseEntity&lt;ExamUser&gt; getExamUserById(@PathVariable Long examId) throws ParseException {
+&nbsp;
+<b class="nc">&nbsp;        String username = userService.getUserName();</b>
+<b class="nc">&nbsp;        Optional&lt;ExamUser&gt; examUser = Optional.ofNullable(examUserService.findByExamAndUser(examId, username));</b>
+<b class="nc">&nbsp;        if (!examUser.isPresent()) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity(&quot;Không tìm th?y exam user này&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Date timeExam = examUser.get().getExam().getBeginExam();</b>
+<b class="nc">&nbsp;        Date now = new Date();</b>
+&nbsp;
+&nbsp;//        if (examUser.get().getIsFinished().equals(false) &amp;&amp; now.compareTo(timeExam) &gt; 0) {
+&nbsp;//            examUser.get().setIsFinished(true);
+&nbsp;//            examUser.get().setTimeFinish(timeExam);
+&nbsp;//        }
+<b class="nc">&nbsp;        return ResponseEntity.ok(examUser.get());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/{examId}/questions&quot;)
+&nbsp;    public ResponseEntity&lt;ExamQuestionList&gt; getAllQuestions(@PathVariable Long examId) throws IOException {
+<b class="nc">&nbsp;        String username = userService.getUserName();</b>
+<b class="nc">&nbsp;        ExamQuestionList examQuestionList = new ExamQuestionList();</b>
+<b class="nc">&nbsp;        Optional&lt;Exam&gt; exam = examService.getExamById(examId);</b>
+<b class="nc">&nbsp;        if (!exam.isPresent()) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity(&quot;Không tìm th?y exam này&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Date currentTime = new Date();</b>
+<b class="nc">&nbsp;        if (exam.get().isLocked() == true || exam.get().getBeginExam().compareTo(currentTime) &gt; 0) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity(&quot;Bài thi ?ang b? khoá ho?c ch?a t?i th?i gian phù h?p&quot;, HttpStatus.BAD_REQUEST);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        ExamUser examUser = examUserService.findByExamAndUser(examId, username);</b>
+<b class="nc">&nbsp;        examQuestionList.setRemainingTime(examUser.getRemainingTime());</b>
+<b class="nc">&nbsp;        if (examUser.getIsStarted().equals(true)) {</b>
+&nbsp;//            Get answersheet
+&nbsp;            //            Convert question data json to array object
+&nbsp;
+<b class="nc">&nbsp;            List&lt;AnswerSheet&gt; choiceUsers = convertAnswerJsonToObject(examUser);</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;Question&gt; questions1 = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            choiceUsers.forEach(answerSheet1 -&gt; {</b>
+<b class="nc">&nbsp;                Question question = questionService.getQuestionById(answerSheet1.getQuestionId()).get();</b>
+<b class="nc">&nbsp;                question.setChoices(answerSheet1.getChoices());</b>
+<b class="nc">&nbsp;                question.setPoint(answerSheet1.getPoint());</b>
+<b class="nc">&nbsp;                questions1.add(question);</b>
+&nbsp;            });
+&nbsp;
+<b class="nc">&nbsp;            examQuestionList.setQuestions(questions1);</b>
+<b class="nc">&nbsp;            examQuestionList.setExam(exam.get());</b>
+<b class="nc">&nbsp;            logger.error(&quot;case 1&quot;);</b>
+<b class="nc">&nbsp;        } else if (exam.get().isShuffle() == true) {</b>
+<b class="nc">&nbsp;            ObjectMapper mapper = new ObjectMapper();</b>
+<b class="nc">&nbsp;            String answerSheet = exam.get().getQuestionData();</b>
+<b class="nc">&nbsp;            List&lt;ExamQuestionPoint&gt; examQuestionPoints = mapper.readValue(answerSheet, new TypeReference&lt;List&lt;ExamQuestionPoint&gt;&gt;() {</b>
+&nbsp;            });
+<b class="nc">&nbsp;            Collections.shuffle(examQuestionPoints);</b>
+&nbsp;//            save to answer sheet
+<b class="nc">&nbsp;            List&lt;Question&gt; questions = questionService.getQuestionPointList(examQuestionPoints);</b>
+<b class="nc">&nbsp;            List&lt;AnswerSheet&gt; answerSheets = questionService.convertFromQuestionList(questions);</b>
+&nbsp;            //            Convert answer sheet to json
+<b class="nc">&nbsp;            String answerSheetConvertToJson = mapper.writeValueAsString(answerSheets);</b>
+<b class="nc">&nbsp;            examUser.setAnswerSheet(answerSheetConvertToJson);</b>
+<b class="nc">&nbsp;            examQuestionList.setExam(exam.get());</b>
+<b class="nc">&nbsp;            examUser.setIsStarted(true);</b>
+<b class="nc">&nbsp;            examUserService.update(examUser);</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;Question&gt; questions1 = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            answerSheets.forEach(answerSheet1 -&gt; {</b>
+<b class="nc">&nbsp;                Question question = questionService.getQuestionById(answerSheet1.getQuestionId()).get();</b>
+<b class="nc">&nbsp;                question.setChoices(answerSheet1.getChoices());</b>
+<b class="nc">&nbsp;                question.setPoint(answerSheet1.getPoint());</b>
+<b class="nc">&nbsp;                questions1.add(question);</b>
+&nbsp;            });
+<b class="nc">&nbsp;            examQuestionList.setQuestions(questions1);</b>
+<b class="nc">&nbsp;            examUser.setTimeStart(new Date());</b>
+<b class="nc">&nbsp;            examUserService.update(examUser);</b>
+<b class="nc">&nbsp;            logger.error(&quot;case 2&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        } else {</b>
+&nbsp;            //            save to answer sheet
+&nbsp;//            convert question json to object list
+<b class="nc">&nbsp;            ObjectMapper mapper = new ObjectMapper();</b>
+<b class="nc">&nbsp;            String answerSheet = exam.get().getQuestionData();</b>
+<b class="nc">&nbsp;            List&lt;ExamQuestionPoint&gt; examQuestionPoints = mapper.readValue(answerSheet, new TypeReference&lt;List&lt;ExamQuestionPoint&gt;&gt;() {</b>
+&nbsp;            });
+&nbsp;
+<b class="nc">&nbsp;            List&lt;Question&gt; questions = questionService.getQuestionPointList(examQuestionPoints);</b>
+<b class="nc">&nbsp;            List&lt;AnswerSheet&gt; answerSheets = questionService.convertFromQuestionList(questions);</b>
+&nbsp;//            Convert answer sheet to json
+<b class="nc">&nbsp;            String answerSheetConvertToJson = mapper.writeValueAsString(answerSheets);</b>
+<b class="nc">&nbsp;            examUser.setAnswerSheet(answerSheetConvertToJson);</b>
+<b class="nc">&nbsp;            examUser.setIsStarted(true);</b>
+<b class="nc">&nbsp;            examUser.setTimeStart(new Date());</b>
+<b class="nc">&nbsp;            examUserService.update(examUser);</b>
+<b class="nc">&nbsp;            List&lt;Question&gt; questions1 = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            answerSheets.forEach(answerSheet1 -&gt; {</b>
+<b class="nc">&nbsp;                Question question = questionService.getQuestionById(answerSheet1.getQuestionId()).get();</b>
+<b class="nc">&nbsp;                question.setChoices(answerSheet1.getChoices());</b>
+<b class="nc">&nbsp;                question.setPoint(answerSheet1.getPoint());</b>
+<b class="nc">&nbsp;                questions1.add(question);</b>
+&nbsp;            });
+<b class="nc">&nbsp;            examQuestionList.setQuestions(questions1);</b>
+<b class="nc">&nbsp;            examQuestionList.setExam(exam.get());</b>
+<b class="nc">&nbsp;            logger.error(&quot;case 3&quot;);</b>
+&nbsp;
+&nbsp;        }
+<b class="nc">&nbsp;        return new ResponseEntity(examQuestionList, HttpStatus.OK);</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(value = &quot;/exams&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; createExam(@Valid @RequestBody Exam exam, @RequestParam Long intakeId, @RequestParam Long partId, @RequestParam boolean isShuffle, boolean locked) {
+&nbsp;        try {
+<b class="nc">&nbsp;            String username = userService.getUserName();</b>
+<b class="nc">&nbsp;            User user = userService.getUserByUsername(username).get();</b>
+<b class="nc">&nbsp;            Optional&lt;Intake&gt; intake = intakeService.findById(intakeId);</b>
+<b class="nc">&nbsp;            if (intake.isPresent()) {</b>
+<b class="nc">&nbsp;                exam.setIntake(intake.get());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Optional&lt;Part&gt; part = partService.findPartById(partId);</b>
+<b class="nc">&nbsp;            if (part.isPresent()) {</b>
+<b class="nc">&nbsp;                exam.setPart(part.get());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            exam.setCreatedBy(user);</b>
+<b class="nc">&nbsp;            exam.setShuffle(isShuffle);</b>
+<b class="nc">&nbsp;            exam.setCanceled(false);</b>
+<b class="nc">&nbsp;            logger.error(&quot;begin: &quot; + exam.getBeginExam());</b>
+&nbsp;
+<b class="nc">&nbsp;            this.examService.saveExam(exam);</b>
+<b class="nc">&nbsp;            List&lt;User&gt; users = userService.findAllByIntakeId(intakeId);</b>
+<b class="nc">&nbsp;            examUserService.create(exam, users);</b>
+&nbsp;
+&nbsp;//            Convert question data json to array object
+<b class="nc">&nbsp;            ObjectMapper mapper = new ObjectMapper();</b>
+<b class="nc">&nbsp;            String questionJson = exam.getQuestionData();</b>
+<b class="nc">&nbsp;            List&lt;ExamQuestionPoint&gt; examQuestionPoints = mapper.readValue(questionJson, new TypeReference&lt;List&lt;ExamQuestionPoint&gt;&gt;() {</b>
+&nbsp;            });
+&nbsp;
+<b class="nc">&nbsp;            return ResponseEntity.ok(exam);</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Exam&gt; getExamById(@PathVariable(&quot;id&quot;) Long id) {
+<b class="nc">&nbsp;        Optional&lt;Exam&gt; exam = examService.getExamById(id);</b>
+<b class="nc">&nbsp;        if (!exam.isPresent()) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(exam.get(),</b>
+<b class="nc">&nbsp;                    HttpStatus.NO_CONTENT);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return new ResponseEntity&lt;&gt;(exam.get(), HttpStatus.OK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(value = &quot;/exams/{examId}/questions-by-user&quot;)
+&nbsp;    public void saveUserExamAnswer(@RequestBody List&lt;AnswerSheet&gt; answerSheets, @PathVariable Long examId, @RequestParam boolean isFinish, @RequestParam int remainingTime) throws JsonProcessingException {
+<b class="nc">&nbsp;        Authentication auth = SecurityContextHolder.getContext().getAuthentication();</b>
+<b class="nc">&nbsp;        String username = auth.getName();</b>
+<b class="nc">&nbsp;        Optional&lt;ExamUser&gt; examUser = Optional.ofNullable(examUserService.findByExamAndUser(examId, username));</b>
+<b class="nc">&nbsp;        if (!examUser.isPresent()) {</b>
+<b class="nc">&nbsp;            throw new EntityNotFoundException(&quot;Not found this exam&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            if (examUser.get().getIsFinished()) {</b>
+&nbsp;
+<b class="nc">&nbsp;                throw new ExceptionInInitializerError(&quot;This exam was end&quot;);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            ObjectMapper mapper = new ObjectMapper();</b>
+<b class="nc">&nbsp;            String answerSheetConvertToJson = mapper.writeValueAsString(answerSheets);</b>
+<b class="nc">&nbsp;            examUser.get().setAnswerSheet(answerSheetConvertToJson);</b>
+<b class="nc">&nbsp;            examUser.get().setIsFinished(isFinish);</b>
+<b class="nc">&nbsp;            if (isFinish == true) {</b>
+<b class="nc">&nbsp;                examUser.get().setTimeFinish(new Date());</b>
+&nbsp;            }
+<b class="nc">&nbsp;            examUser.get().setRemainingTime(remainingTime);</b>
+<b class="nc">&nbsp;            examUserService.update(examUser.get());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/{examId}/result/all&quot;)
+&nbsp;    public ResponseEntity getResultExamAll(@PathVariable Long examId) throws IOException {
+<b class="nc">&nbsp;        List&lt;ExamResult&gt; examResults = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        Optional&lt;Exam&gt; exam = examService.getExamById(examId);</b>
+<b class="nc">&nbsp;        if (!exam.isPresent()) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity(&quot;Không tìm th?y exam&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        List&lt;ExamUser&gt; examUserList = examUserService.findAllByExam_Id(exam.get().getId());</b>
+<b class="nc">&nbsp;        List&lt;ExamQuestionPoint&gt; examQuestionPoints = convertQuestionJsonToObject(exam);</b>
+<b class="nc">&nbsp;        Date now = new Date();</b>
+<b class="nc">&nbsp;        for (ExamUser examUser :</b>
+<b class="nc">&nbsp;                examUserList) {</b>
+<b class="nc">&nbsp;            ExamResult examResult = new ExamResult();</b>
+<b class="nc">&nbsp;            examResult.setExam(exam.get());</b>
+<b class="nc">&nbsp;            List&lt;AnswerSheet&gt; userChoices = convertAnswerJsonToObject(examUser);</b>
+<b class="nc">&nbsp;            if (userChoices.isEmpty()) {</b>
+<b class="nc">&nbsp;                examResult.setTotalPoint(null);</b>
+<b class="nc">&nbsp;                examResult.setUser(examUser.getUser());</b>
+<b class="nc">&nbsp;                examResult.setExamStatus(0);</b>
+&nbsp;
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                List&lt;ChoiceList&gt; choiceLists = examService.getChoiceList(userChoices, examQuestionPoints);</b>
+<b class="nc">&nbsp;                examResult.setChoiceList(choiceLists);</b>
+<b class="nc">&nbsp;                Double totalPoint = 0.0;</b>
+<b class="nc">&nbsp;                for (ChoiceList choice : choiceLists) {</b>
+<b class="nc">&nbsp;                    if (choice.getIsSelectedCorrected().equals(true)) {</b>
+<b class="nc">&nbsp;                        totalPoint += choice.getPoint();</b>
+&nbsp;                    }
+&nbsp;                }
+<b class="nc">&nbsp;                examResult.setTotalPoint(totalPoint);</b>
+<b class="nc">&nbsp;                if (examUser.getTotalPoint() == -1) {</b>
+<b class="nc">&nbsp;                    examUser.setTotalPoint(totalPoint);</b>
+<b class="nc">&nbsp;                    examUserService.update(examUser);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            examResult.setUser(examUser.getUser());</b>
+<b class="nc">&nbsp;            examResult.setUserTimeBegin(examUser.getTimeStart());</b>
+<b class="nc">&nbsp;            examResult.setUserTimeFinish(examUser.getTimeFinish());</b>
+<b class="nc">&nbsp;            if (exam.get().getFinishExam().compareTo(now) &lt; 0 &amp;&amp; examUser.getIsStarted().equals(false)) {</b>
+<b class="nc">&nbsp;                examResult.setExamStatus(-2);</b>
+<b class="nc">&nbsp;            } else if (examUser.getIsStarted().equals(false) &amp;&amp; exam.get().getFinishExam().compareTo(now) == 1) {</b>
+<b class="nc">&nbsp;                examResult.setExamStatus(0);</b>
+<b class="nc">&nbsp;            } else if (examUser.getIsFinished().equals(true)) {</b>
+<b class="nc">&nbsp;                examResult.setExamStatus(-1);</b>
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                examResult.setExamStatus(1);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            examResults.add(examResult);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return new ResponseEntity(examResults, HttpStatus.OK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/{examId}/result/all/question-report&quot;)
+&nbsp;    public ResponseEntity getResultExamQuestionsReport(@PathVariable Long examId) throws IOException {
+&nbsp;
+<b class="nc">&nbsp;        Optional&lt;Exam&gt; exam = examService.getExamById(examId);</b>
+<b class="nc">&nbsp;        if (!exam.isPresent()) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;NOT found&quot;);</b>
+<b class="nc">&nbsp;            return new ResponseEntity(&quot;Không tìm th?y exam&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        List&lt;ExamUser&gt; finishedExamUser = examUserService.findExamUsersByIsFinishedIsTrueAndExam_Id(examId);</b>
+<b class="nc">&nbsp;        if (finishedExamUser.size() == 0) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity(&quot;Ch?a có ng??i dùng th?c hi?n bài ki?m tra&quot;, HttpStatus.OK);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        ExamUser firstExamUser = finishedExamUser.get(0);</b>
+<b class="nc">&nbsp;        List&lt;QuestionExamReport&gt; questionExamReports = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;ExamQuestionPoint&gt; examQuestionPoints = convertQuestionJsonToObject(exam);</b>
+&nbsp;//        convert answer sheet of first user
+<b class="nc">&nbsp;        List&lt;AnswerSheet&gt; userChoicesFirstExam = convertAnswerJsonToObject(firstExamUser);</b>
+&nbsp;//        get exam result of first user
+<b class="nc">&nbsp;        List&lt;ChoiceList&gt; firstChoiceList = examService.getChoiceList(userChoicesFirstExam, examQuestionPoints);</b>
+<b class="nc">&nbsp;        for (ChoiceList choice : firstChoiceList) {</b>
+<b class="nc">&nbsp;            QuestionExamReport questionExamReport = new QuestionExamReport();</b>
+<b class="nc">&nbsp;            questionExamReport.setQuestion(choice.getQuestion());</b>
+&nbsp;
+<b class="nc">&nbsp;            if (choice.getIsSelectedCorrected().equals(true)) {</b>
+<b class="nc">&nbsp;                questionExamReport.setCorrectTotal(1);</b>
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                questionExamReport.setCorrectTotal(0);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            questionExamReports.add(questionExamReport);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;//        done for first user
+<b class="nc">&nbsp;        if (questionExamReports.size() == 0) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity(questionExamReports, HttpStatus.OK);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        for (int i = 1; i &lt; finishedExamUser.size(); i++) {</b>
+<b class="nc">&nbsp;            List&lt;AnswerSheet&gt; userChoices = convertAnswerJsonToObject(firstExamUser);</b>
+&nbsp;//        get exam result of first user
+<b class="nc">&nbsp;            List&lt;ChoiceList&gt; choiceList = examService.getChoiceList(userChoices, examQuestionPoints);</b>
+<b class="nc">&nbsp;            for (ChoiceList choice : firstChoiceList) {</b>
+&nbsp;
+<b class="nc">&nbsp;                List&lt;QuestionExamReport&gt; questionExamReportsList = questionExamReports.stream().filter(item -&gt; item.getQuestion().getId() == choice.getQuestion().getId()).collect(Collectors.toList());</b>
+<b class="nc">&nbsp;                QuestionExamReport questionExamReport = questionExamReportsList.get(0);</b>
+<b class="nc">&nbsp;                if (choice.getIsSelectedCorrected().equals(true)) {</b>
+<b class="nc">&nbsp;                    questionExamReport.setCorrectTotal(questionExamReport.getCorrectTotal() + 1);</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        return new ResponseEntity(questionExamReports, HttpStatus.OK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/{examId}/result&quot;)
+&nbsp;    public ResponseEntity getResultExam(@PathVariable Long examId) throws IOException {
+<b class="nc">&nbsp;        ExamResult examResult = new ExamResult();</b>
+<b class="nc">&nbsp;        String username = userService.getUserName();</b>
+<b class="nc">&nbsp;        Optional&lt;Exam&gt; exam = examService.getExamById(examId);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!exam.isPresent()) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity(&quot;Không tìm th?y exam&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+&nbsp;//        Set exam for examResult
+<b class="nc">&nbsp;        examResult.setExam(exam.get());</b>
+&nbsp;
+&nbsp;//        Set list question user&#39;s choice for examResult
+<b class="nc">&nbsp;        List&lt;ExamQuestionPoint&gt; examQuestionPoints = convertQuestionJsonToObject(exam);</b>
+<b class="nc">&nbsp;        ExamUser examUser = examUserService.findByExamAndUser(examId, username);</b>
+<b class="nc">&nbsp;        List&lt;AnswerSheet&gt; userChoices = convertAnswerJsonToObject(examUser);</b>
+<b class="nc">&nbsp;        List&lt;ChoiceList&gt; choiceLists = examService.getChoiceList(userChoices, examQuestionPoints);</b>
+<b class="nc">&nbsp;        examResult.setChoiceList(choiceLists);</b>
+<b class="nc">&nbsp;        Double totalPoint = 0.0;</b>
+<b class="nc">&nbsp;        for (ChoiceList choice : choiceLists) {</b>
+<b class="nc">&nbsp;            if (choice.getIsSelectedCorrected().equals(true)) {</b>
+<b class="nc">&nbsp;                totalPoint += choice.getPoint();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        examResult.setTotalPoint(totalPoint);</b>
+<b class="nc">&nbsp;        if (examUser.getTotalPoint() == -1) {</b>
+<b class="nc">&nbsp;            examUser.setTotalPoint(totalPoint);</b>
+<b class="nc">&nbsp;            examUserService.update(examUser);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return new ResponseEntity(examResult, HttpStatus.OK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/{examId}/users/{username}/result&quot;)
+&nbsp;    public ResponseEntity getResultExamByUser(@PathVariable Long examId, @PathVariable String username) throws IOException {
+<b class="nc">&nbsp;        ExamResult examResult = new ExamResult();</b>
+<b class="nc">&nbsp;        Optional&lt;Exam&gt; exam = examService.getExamById(examId);</b>
+<b class="nc">&nbsp;        User user = userService.getUserByUsername(username).get();</b>
+<b class="nc">&nbsp;        if (!exam.isPresent()) {</b>
+<b class="nc">&nbsp;            return new ResponseEntity(&quot;Không tìm th?y exam&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;        }
+&nbsp;//        Set exam for examResult
+<b class="nc">&nbsp;        examResult.setExam(exam.get());</b>
+<b class="nc">&nbsp;        examResult.setUser(user);</b>
+&nbsp;
+&nbsp;//        Set list question user&#39;s choice for examResult
+<b class="nc">&nbsp;        List&lt;ExamQuestionPoint&gt; examQuestionPoints = convertQuestionJsonToObject(exam);</b>
+<b class="nc">&nbsp;        ExamUser examUser = examUserService.findByExamAndUser(examId, username);</b>
+<b class="nc">&nbsp;        List&lt;AnswerSheet&gt; userChoices = convertAnswerJsonToObject(examUser);</b>
+<b class="nc">&nbsp;        List&lt;ChoiceList&gt; choiceLists = examService.getChoiceList(userChoices, examQuestionPoints);</b>
+<b class="nc">&nbsp;        examResult.setChoiceList(choiceLists);</b>
+<b class="nc">&nbsp;        Double totalPoint = 0.0;</b>
+<b class="nc">&nbsp;        for (ChoiceList choice : choiceLists) {</b>
+<b class="nc">&nbsp;            if (choice.getIsSelectedCorrected().equals(true)) {</b>
+<b class="nc">&nbsp;                totalPoint += choice.getPoint();</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        examResult.setTotalPoint(totalPoint);</b>
+<b class="nc">&nbsp;        if (examUser.getTotalPoint() == -1) {</b>
+<b class="nc">&nbsp;            examUser.setTotalPoint(totalPoint);</b>
+<b class="nc">&nbsp;            examUserService.update(examUser);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        examResult.setUserTimeFinish(examUser.getTimeFinish());</b>
+<b class="nc">&nbsp;        examResult.setUserTimeBegin(examUser.getTimeStart());</b>
+<b class="nc">&nbsp;        examResult.setRemainingTime(exam.get().getDurationExam() * 60 - examUser.getRemainingTime());</b>
+<b class="nc">&nbsp;        return new ResponseEntity(examResult, HttpStatus.OK);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;AnswerSheet&gt; convertAnswerJsonToObject(ExamUser examUser) throws IOException {
+&nbsp;
+&nbsp;//        ObjectMapper mapper = new ObjectMapper();
+<b class="nc">&nbsp;        if (Strings.isNullOrEmpty(examUser.getAnswerSheet())) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        String answerSheet = examUser.getAnswerSheet();</b>
+<b class="nc">&nbsp;        List&lt;AnswerSheet&gt; choiceUsers = mapper.readValue(answerSheet, new TypeReference&lt;List&lt;AnswerSheet&gt;&gt;() {</b>
+&nbsp;        });
+<b class="nc">&nbsp;        return choiceUsers;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exam/{id}/question-text&quot;)
+&nbsp;    public List&lt;ExamDetail&gt; getQuestionTextByExamId(@PathVariable Long id) throws IOException {
+<b class="nc">&nbsp;        Optional&lt;Exam&gt; exam = examService.getExamById(id);</b>
+<b class="nc">&nbsp;        List&lt;ExamQuestionPoint&gt; examQuestionPoints = convertQuestionJsonToObject(exam);</b>
+<b class="nc">&nbsp;        List&lt;ExamDetail&gt; questions = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        examQuestionPoints.forEach(examQuestionPoint -&gt; {</b>
+<b class="nc">&nbsp;            ExamDetail examDetail = new ExamDetail();</b>
+<b class="nc">&nbsp;            Question question = questionService.getQuestionById(examQuestionPoint.getQuestionId()).get();</b>
+<b class="nc">&nbsp;            examDetail.setQuestionText(question.getQuestionText());</b>
+<b class="nc">&nbsp;            examDetail.setPoint(examQuestionPoint.getPoint());</b>
+<b class="nc">&nbsp;            examDetail.setDifficultyLevel(question.getDifficultyLevel().toString());</b>
+<b class="nc">&nbsp;            examDetail.setQuestionType(question.getQuestionType().getDescription());</b>
+<b class="nc">&nbsp;            questions.add(examDetail);</b>
+&nbsp;        });
+<b class="nc">&nbsp;        return questions;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;ExamQuestionPoint&gt; convertQuestionJsonToObject(Optional&lt;Exam&gt; exam) throws IOException {
+&nbsp;//        ObjectMapper mapper = new ObjectMapper();
+<b class="nc">&nbsp;        String answerSheet = exam.get().getQuestionData();</b>
+<b class="nc">&nbsp;        List&lt;ExamQuestionPoint&gt; examQuestionPoints = mapper.readValue(answerSheet, new TypeReference&lt;List&lt;ExamQuestionPoint&gt;&gt;() {</b>
+&nbsp;        });
+<b class="nc">&nbsp;        return examQuestionPoints;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/schedule&quot;)
+&nbsp;    public List&lt;ExamCalendar&gt; getExamCalendar() {
+<b class="nc">&nbsp;        Date now = new Date();</b>
+<b class="nc">&nbsp;        String username = userService.getUserName();</b>
+<b class="nc">&nbsp;        List&lt;ExamUser&gt; examUsers = examUserService.getExamListByUsername(username);</b>
+<b class="nc">&nbsp;        List&lt;ExamCalendar&gt; examCalendars = new ArrayList&lt;ExamCalendar&gt;();</b>
+<b class="nc">&nbsp;        examUsers.forEach(examUser -&gt; {</b>
+<b class="nc">&nbsp;            ExamCalendar examCalendar = new ExamCalendar();</b>
+<b class="nc">&nbsp;            examCalendar.setCourseName(examUser.getExam().getPart().getCourse().getName());</b>
+<b class="nc">&nbsp;            examCalendar.setExamTitle(examUser.getExam().getTitle());</b>
+<b class="nc">&nbsp;            examCalendar.setCourseCode(examUser.getExam().getPart().getCourse().getCourseCode());</b>
+<b class="nc">&nbsp;            examCalendar.setPartName(examUser.getExam().getPart().getName());</b>
+<b class="nc">&nbsp;            examCalendar.setExamId(examUser.getExam().getId());</b>
+<b class="nc">&nbsp;            examCalendar.setDurationExam(examUser.getExam().getDurationExam());</b>
+<b class="nc">&nbsp;            examCalendar.setBeginDate(examUser.getExam().getBeginExam());</b>
+<b class="nc">&nbsp;            examCalendar.setFinishDate(examUser.getExam().getFinishExam());</b>
+&nbsp;//            if (examUser.getIsFinished().equals(true)) {
+&nbsp;//                examCalendar.setCompleteString(&quot;Completed&quot;);
+&nbsp;//                examCalendar.setCompleted(true);
+&nbsp;//            } else {
+&nbsp;//                examCalendar.setCompleteString(&quot;Coming&quot;);
+&nbsp;//                examCalendar.setCompleted(false);
+&nbsp;//            }
+&nbsp;
+&nbsp;
+<b class="nc">&nbsp;            if (examUser.getExam().getFinishExam().compareTo(now) &lt; 0 &amp;&amp; examUser.getIsStarted().equals(false)) {</b>
+<b class="nc">&nbsp;                examCalendar.setCompleteString(&quot;Missed&quot;);</b>
+<b class="nc">&nbsp;                examCalendar.setIsCompleted(-2);</b>
+<b class="nc">&nbsp;            } else if (examUser.getIsStarted().equals(false) &amp;&amp; examUser.getExam().getBeginExam().compareTo(now) == 1) {</b>
+<b class="nc">&nbsp;                examCalendar.setCompleteString(&quot;Not yet started&quot;);</b>
+<b class="nc">&nbsp;                examCalendar.setIsCompleted(0);</b>
+<b class="nc">&nbsp;            } else if (examUser.getIsFinished().equals(true)) {</b>
+<b class="nc">&nbsp;                examCalendar.setCompleteString(&quot;Completed&quot;);</b>
+<b class="nc">&nbsp;                examCalendar.setIsCompleted(-1);</b>
+<b class="nc">&nbsp;            } else {</b>
+<b class="nc">&nbsp;                examCalendar.setCompleteString(&quot;Doing&quot;);</b>
+<b class="nc">&nbsp;                examCalendar.setIsCompleted(1);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            examCalendars.add(examCalendar);</b>
+&nbsp;
+&nbsp;        });
+<b class="nc">&nbsp;        return examCalendars;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/exams/{id}/cancel&quot;)
+&nbsp;    public void cancelExam(@PathVariable Long id) {
+<b class="nc">&nbsp;        String username = userService.getUserName();</b>
+<b class="nc">&nbsp;        User user = userService.getUserByUsername(username).get();</b>
+<b class="nc">&nbsp;        Date now = new Date();</b>
+<b class="nc">&nbsp;        Exam exam = examService.getExamById(id).get();</b>
+<b class="nc">&nbsp;        if (exam.getBeginExam().compareTo(now) &gt; 0) {</b>
+&nbsp;
+&nbsp;//            exam.setCanceled(true);
+<b class="nc">&nbsp;            examService.cancelExam(id);</b>
+<b class="nc">&nbsp;            logger.error(&quot;LLLLL&quot;);</b>
+&nbsp;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;}
+&nbsp;
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-05-15 11:25</div>
+</div>
+</body>
+</html>
