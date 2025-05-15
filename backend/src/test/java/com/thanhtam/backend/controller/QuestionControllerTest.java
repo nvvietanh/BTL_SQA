@@ -313,7 +313,7 @@ public class QuestionControllerTest {
     }
 
     /**
-     * TC_QC_05: Test lấy danh sách câu hỏi theo partId không tồn tại
+     * TC_QC_05: Test lấy danh sách câu hỏi theo tất cả partId ở vai trò admin
      * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId = 0 (admin)
      * Input: partId = 0
      * Kết quả mong đợi: Danh sách câu hỏi của tất cả các part
@@ -335,7 +335,7 @@ public class QuestionControllerTest {
     }
 
     /**
-     * TC_QC_06: Test lấy danh sách câu hỏi theo partId không tồn tại
+     * TC_QC_06: Test lấy danh sách câu hỏi theo tất cả partId ở vài trò lecturer
      * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId = 0 (lecturer)
      * Input: partId = 0
      * Kết quả mong đợi: Danh sách câu hỏi của tất cả các part
@@ -356,9 +356,9 @@ public class QuestionControllerTest {
     }
 
     /**
-     * TC_QC_07: Test lấy danh sách câu hỏi theo partId không tồn tại
-     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId không tồn tại (admin)
-     * Input: partId không tồn tại
+     * TC_QC_07: Test lấy danh sách câu hỏi theo partId ở vai trò admin
+     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId (admin)
+     * Input: partId có tồn tại
      * Kết quả mong đợi: Danh sách câu hỏi rỗng
      */
     @Test
@@ -376,9 +376,9 @@ public class QuestionControllerTest {
     }
 
     /**
-     * TC_QC_08: Test lấy danh sách câu hỏi theo partId không tồn tại
-     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId không tồn tại (lecturer)
-     * Input: partId không tồn tại
+     * TC_QC_08: Test lấy danh sách câu hỏi theo partId ở vai trò lecturer
+     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId (lecturer)
+     * Input: partId có tồn tại
      * Kết quả mong đợi: Danh sách câu hỏi rỗng
      */
     @Test
@@ -441,19 +441,19 @@ public class QuestionControllerTest {
     }
 
     /**
-     * TC_QC_11: Test lấy danh sách câu hỏi theo partId không tồn tại
-     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId không tồn tại (admin)
+     * TC_QC_11: Test lấy danh sách câu hỏi theo partId, chưa bị xóa, ở role admin
+     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId, chưa bị xóa, ở role admin
      * Input: partId không tồn tại
-     * Kết quả mong đợi: Danh sách câu hỏi rỗng
+     * Kết quả mong đợi: Danh sách câu hỏi chưa bị xóa
      */
     @Test
     public void testGetQuestionsByPartNotDeleted_Admin() {
         // Đăng nhập admin (giả lập context nếu cần)
-        String adminUsername = "thanhtam28ss"; // Đổi thành username admin thực tế
+        String adminUsername = "thanhtam28ss";
         // userService.setUserNameForTest(adminUsername);
         setUserAuthentication(adminUsername, "ROLE_ADMIN");
 
-        Long partId = 1L; // Thay thế bằng ID của part hợp lệ trong DB
+        Long partId = 1L;
 
         Pageable pageable = PageRequest.of(0, 10);
         PageResult result = questionController.getQuestionsByPartNotDeleted(pageable, partId);
@@ -466,8 +466,8 @@ public class QuestionControllerTest {
     }
 
     /**
-     * TC_QC_12: Test lấy danh sách câu hỏi theo partId không tồn tại
-     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId không tồn tại (lecturer)
+     * TC_QC_12: Test lấy danh sách câu hỏi theo partId, chưa bị xóa, ở role lecturer
+     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId, chưa bị xóa, ở role lecturer
      * Input: partId không tồn tại
      * Kết quả mong đợi: Danh sách câu hỏi rỗng
      */
@@ -497,10 +497,10 @@ public class QuestionControllerTest {
     }
 
     /**
-     * TC_QC_13: Test lấy danh sách câu hỏi theo partId không tồn tại
+     * TC_QC_13: Test lấy danh sách câu hỏi chưa bị xóa theo partId không tồn tại ở role admin
      * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId không tồn tại (admin)
      * Input: partId không tồn tại
-     * Kết quả mong đợi: Danh sách câu hỏi rỗng
+     * Kết quả mong đợi: Ném ra NoSuchElementException
      */
     @Test
     public void testGetQuestionsByPartNotDeleted_Admin_InvalidPart() {
@@ -520,10 +520,10 @@ public class QuestionControllerTest {
     }
 
     /**
-     * TC_QC_14: Test lấy danh sách câu hỏi theo partId không tồn tại
-     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId không tồn tại (lecturer)
+     * TC_QC_14: Test lấy danh sách câu hỏi theo QuestionType thành công
+     * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi QuestionType
      * Input: partId không tồn tại
-     * Kết quả mong đợi: Danh sách câu hỏi rỗng
+     * Kết quả mong đợi: Danh sách câu hỏi theo QuestionType
      */
     @Test
 public void testGetQuestionByQuestionType_Success() {
@@ -546,7 +546,7 @@ public void testGetQuestionByQuestionType_Success() {
 }
 
     /**
-     * TC_QC_15: Test lấy danh sách câu hỏi theo partId không tồn tại
+     * TC_QC_15: Test lấy danh sách câu hỏi theo QuestionType không tồn tại
      * Mục tiêu: Kiểm tra API lấy danh sách câu hỏi theo partId không tồn tại (lecturer)
      * Input: partId không tồn tại
      * Kết quả mong đợi: Danh sách câu hỏi rỗng
@@ -626,47 +626,6 @@ public void testGetQuestionByQuestionType_Success() {
         Assert.assertEquals(EQTypeCode.MC, createdQuestion.getQuestionType().getTypeCode());
     }
 
-//     @Test
-//     public void testUpdateQuestion_Success() throws IOException {
-//         // Kiểm tra service không null
-//         Assert.assertNotNull("QuestionService bị null!", questionService);
-
-//         // Lấy question có id = 1 từ DB
-//         Optional<Question> questionOpt = questionService.getQuestionById(8L);
-//         Assert.assertTrue("Question không tồn tại!", questionOpt.isPresent());
-
-//         // Tạo question mới để update
-//         Question question = new Question();
-//         question.setQuestionText("Updated Question");
-//         question.setDifficultyLevel(DifficultyLevel.MEDIUM);
-
-//         // Gọi API update question
-// //        ResponseEntity<String> response = restTemplate.exchange(
-// //            getRootUrl() + "/questions/1",
-// //            HttpMethod.PUT,
-// //            new HttpEntity<>(question, new HttpHeaders()),
-// //            String.class
-// //        );
-// //
-// //        // Kiểm tra kết quả
-// //        Assert.assertEquals(200, response.getStatusCodeValue());
-// //
-// //        // Parse response body
-// //        ServiceResult serviceResult = objectMapper.readValue(response.getBody(), ServiceResult.class);
-// //        Assert.assertEquals(200, serviceResult.getStatusCode());
-// //        Assert.assertEquals("Get question with id: 1", serviceResult.getMessage());
-
-//         // Kiểm tra dữ liệu
-// //        Question updatedQuestion = objectMapper.convertValue(serviceResult.getData(), Question.class);
-
-//         ResponseEntity
-
-//         Assert.assertNotNull("Question không được null!", updatedQuestion);
-//         Assert.assertEquals("Updated Question", updatedQuestion.getQuestionText());
-//         Assert.assertEquals(DifficultyLevel.MEDIUM, updatedQuestion.getDifficultyLevel());
-//         Assert.assertEquals(10, updatedQuestion.getPoint()); // MEDIUM = 10 points
-//     }
-
     /**
      * TC_QC_17: Test cập nhật câu hỏi thành công
      * Mục tiêu: Kiểm tra API cập nhật câu hỏi thành công
@@ -730,7 +689,7 @@ public void testGetQuestionByQuestionType_Success() {
      * TC_QC_19: Test cập nhật câu hỏi null
      * Mục tiêu: Kiểm tra API cập nhật câu hỏi null
      * Input: question null
-     * Kết quả mong đợi: Trả về mã lỗi 400 và thông báo lỗi
+     * Kết quả mong đợi: ném ra NullPointerException hoặc IllegalArgumentException
      */
     @Test
     public void testUpdateQuestion_NullQuestion() {
@@ -770,7 +729,7 @@ public void testGetQuestionByQuestionType_Success() {
      * TC_QC_21: Test xóa câu hỏi thành công
      * Mục tiêu: Kiểm tra API xóa câu hỏi thành công
      * Input: ID của câu hỏi hợp lệ
-     * Kết quả mong đợi: Câu hỏi được xóa thành công và không còn tồn tại trong DB
+     * Kết quả mong đợi: Câu hỏi được gán trạng thái deleted=true
      */
     @Test
     public void testDeleteQuestion_Success() {
@@ -788,40 +747,3 @@ public void testGetQuestionByQuestionType_Success() {
         Assert.assertTrue("Question chưa được đánh dấu là đã xóa!", deletedQuestion.get().isDeleted());
     }
  }
-// @Test
-// public void testGetQuestionById_ValidId() throws Exception {
-//     // Arrange
-//     Long validId = 1L;
-//     Question mockQuestion = new Question();
-//     mockQuestion.setId(validId);
-//     mockQuestion.setQuestionText("Sample Question");
-//     Mockito.when(questionService.getQuestionById(validId)).thenReturn(Optional.of(mockQuestion));
-
-//     // Act
-//     ResponseEntity<?> response = questionController.getQuestionById(validId);
-
-//     // Assert
-//     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-//     Assert.assertTrue(response.getBody() instanceof Question);
-//     Question returnedQuestion = (Question) response.getBody();
-//     Assert.assertEquals(validId, returnedQuestion.getId());
-//     Assert.assertEquals("Sample Question", returnedQuestion.getQuestionText());
-// }
-
-// @Test
-// public void testGetQuestionById_InvalidId() throws Exception {
-//     // Arrange
-//     Long invalidId = 999L;
-//     Mockito.when(questionService.getQuestionById(invalidId)).thenReturn(Optional.empty());
-
-//     // Act
-//     ResponseEntity<?> response = questionController.getQuestionById(invalidId);
-
-//     // Assert
-//     Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-//     Assert.assertTrue(response.getBody() instanceof ServiceResult);
-//     ServiceResult serviceResult = (ServiceResult) response.getBody();
-//     Assert.assertEquals(404, serviceResult.getStatusCode());
-//     Assert.assertEquals("Not found with id: " + invalidId, serviceResult.getMessage());
-//     Assert.assertNull(serviceResult.getData());
-// }
