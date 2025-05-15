@@ -23,6 +23,7 @@ public interface CourseService {
     boolean existsById(Long id);
 
     List<Course> findAllByIntakeId(Long intakeId);
+
     Course findCourseByPartId(Long partId);
 
 }

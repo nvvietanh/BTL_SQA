@@ -57,14 +57,6 @@ public class ExamController {
         this.mapper = mapper;
     }
 
-//    @GetMapping(value = "/exams")
-//    public ResponseEntity<List<Exam>> getAll() {
-//        List<Exam> exams = examService.getAll();
-//        if (exams.isEmpty()) {
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        return new ResponseEntity<>(exams, HttpStatus.OK);
-//    }
 
     @GetMapping(value = "/exams")
     @PreAuthorize("hasRole('ADMIN') or hasRole('LECTURER')")
