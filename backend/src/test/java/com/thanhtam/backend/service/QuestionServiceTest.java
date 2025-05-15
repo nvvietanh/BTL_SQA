@@ -20,12 +20,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
+@Rollback
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class QuestionServiceTest {
 
@@ -206,6 +209,7 @@ public class QuestionServiceTest {
      */
     @Test
     @Transactional
+    @Rollback
     public void testSaveQuestion_EASY() {
         // Tạo câu hỏi mới với mức EASY
         Question question = new Question();
@@ -239,6 +243,7 @@ public class QuestionServiceTest {
      */
     @Test
     @Transactional
+    @Rollback
     public void testSaveQuestion_MEDIUM() {
         // Tạo câu hỏi mới với mức MEDIUM
         Question question = new Question();
@@ -272,6 +277,7 @@ public class QuestionServiceTest {
      */
     @Test
     @Transactional
+    @Rollback
     public void testSaveQuestion_HARD() {
         // Tạo câu hỏi mới với mức HARD
         Question question = new Question();
@@ -305,6 +311,7 @@ public class QuestionServiceTest {
      */
     @Test
     @Transactional
+    @Rollback
     public void testUpdateQuestion_Success() {
         // Lấy câu hỏi có id = 8 từ DB
         Optional<Question> questionOpt = questionService.getQuestionById(8L);
@@ -336,6 +343,7 @@ public class QuestionServiceTest {
      */
     @Test
     @Transactional
+    @Rollback
     public void testDeleteQuestion_Success() {
         // Lấy câu hỏi có id = 8 từ DB
         Optional<Question> questionOpt = questionService.getQuestionById(8L);
@@ -543,6 +551,98 @@ public class QuestionServiceTest {
     }
 
     /**
+     * TC_QS_20: Test lấy danh sách câu hỏi từ danh sách điểm với ID không tồn tại
+     * Mục tiêu: Kiểm tra phương thức getQuestionPointList xử lý trường hợp ID không tồn tại
+     * Input: List<ExamQuestionPoint> với ID không tồn tại
+     * Output kỳ vọng: NoSuchElementException
+     */
+    @Test
+    @Transactional
+    public void testGetQuestionPointList_QuestionNotFound() {
+        // Tạo danh sách điểm với questionID không tồn tại
+        List<ExamQuestionPoint> examQuestionPoints = new ArrayList<>();
+        ExamQuestionPoint point = new ExamQuestionPoint();
+        point.setQuestionId(9999L); // ID không tồn tại
+        point.setPoint(5);
+        examQuestionPoints.add(point);
+
+        // Lấy danh sách câu hỏi từ danh sách điểm với questionID không tồn tại
+        try {
+            questionService.getQuestionPointList(examQuestionPoints);
+            Assert.fail("Phải ném ra NoSuchElementException!");
+        } catch (NoSuchElementException e) {
+            // Đúng như mong đợi
+        }
+    }
+
+    /**
+     * TC_QS_21: Test chuyển đổi danh sách câu hỏi thành danh sách phiếu trả lời với câu hỏi không có choices
+     * Mục tiêu: Kiểm tra phương thức convertFromQuestionList xử lý trường hợp câu hỏi không có choices
+     * Input: List<Question> với một câu hỏi không có choices
+     * Output kỳ vọng: List<AnswerSheet> với choices là null
+     */
+    @Test
+    @Transactional
+    public void testConvertFromQuestionList_QuestionWithoutChoices() {
+        // Tạo danh sách câu hỏi với một câu hỏi không có choices
+        Question question = new Question();
+        question.setId(1L);
+        question.setChoices(null); // Không có choices
+        question.setPoint(10);
+
+        List<Question> questions = new ArrayList<>();
+        questions.add(question);
+
+        try {
+            // Chuyển đổi danh sách câu hỏi thành danh sách phiếu trả lời
+            List<AnswerSheet> answerSheets = questionService.convertFromQuestionList(questions);
+
+            // Kiểm tra kết quả
+            Assert.assertNotNull("Danh sách phiếu trả lời không được null!", answerSheets);
+            Assert.assertEquals(1, answerSheets.size());
+            Assert.assertNull("Choices phải là null!", answerSheets.get(0).getChoices());
+        } catch (NullPointerException e) {
+            Assert.fail("Không nên ném ra exception: " + e.getMessage());
+        }
+    }
+
+    /**
+     * TC_QS_22: Test lưu câu hỏi với difficultyLevel null
+     * Mục tiêu: Kiểm tra phương thức save xử lý trường hợp difficultyLevel null
+     * Input: Question với difficultyLevel = null
+     * Output kỳ vọng: Điểm mặc định là 0
+     * Lưu ý: Câu hỏi vẫn được lưu thành công
+     * Chú thích: Trong thực tế, có thể không nên cho phép lưu câu hỏi với difficultyLevel null
+     */
+    @Test
+    @Transactional
+    @Rollback
+    public void testSaveQuestion_NullDifficultyLevel() {
+        // Tạo câu hỏi mới với difficultyLevel = null
+        Question question = new Question();
+        question.setQuestionText("Test Question NULL Difficulty");
+        question.setDifficultyLevel(null); // Null difficulty level
+
+        // Lấy part và questionType từ DB
+        Optional<Part> partOpt = partService.findPartById(1L);
+        Optional<QuestionType> questionTypeOpt = questionTypeService.getQuestionTypeById(1L);
+
+        Assert.assertTrue("Part không tồn tại!", partOpt.isPresent());
+        Assert.assertTrue("QuestionType không tồn tại!", questionTypeOpt.isPresent());
+
+        question.setPart(partOpt.get());
+        question.setQuestionType(questionTypeOpt.get());
+
+        // Lưu câu hỏi
+        questionService.save(question);
+
+        // Kiểm tra kết quả
+        Optional<Question> savedQuestion = questionService.getQuestionById(question.getId());
+        Assert.assertTrue("Câu hỏi không được lưu!", savedQuestion.isPresent());
+        Assert.assertEquals(0, savedQuestion.get().getPoint()); // Điểm mặc định là 0
+    }
+
+    /**
      * TC_QS_20: Test lấy nội dung câu hỏi theo ID không tồn tại
      * Mục tiêu: Kiểm tra phương thức findQuestionTextById xử lý trường hợp id không tồn tại
      * Input: questionId = 999L (không tồn tại)
@@ -566,6 +666,7 @@ public class QuestionServiceTest {
      */
     @Test
     @Transactional
+    @Rollback
     public void testSaveQuestion_NullQuestion() {
         // Thử lưu câu hỏi null
         try {
@@ -584,12 +685,37 @@ public class QuestionServiceTest {
      */
     @Test
     @Transactional
+    @Rollback
     public void testUpdateQuestion_NullQuestion() {
         // Thử cập nhật câu hỏi null
         try {
             questionService.update(null);
             Assert.fail("Phải ném ra NullPointerException!");
         } catch (NullPointerException e) {
+            // Đúng như mong đợi
+        }
+    }
+
+    /**
+     * TC_QS_23: Test cập nhật câu hỏi không tồn tại
+     * Mục tiêu: Kiểm tra phương thức update xử lý trường hợp câu hỏi không tồn tại
+     * Input: Question với id không tồn tại trong CSDL
+     * Output kỳ vọng: RuntimeException
+     */
+    @Test
+    @Transactional
+    @Rollback
+    public void testUpdateQuestion_NotFound() {
+        // Tạo câu hỏi mới không tồn tại trong DB
+        Question question = new Question();
+        question.setId(9999L); // ID không tồn tại
+        question.setQuestionText("Nonexistent Question");
+
+        // Thử cập nhật câu hỏi
+        try {
+            questionService.update(question);
+            Assert.fail("Phải ném ra RuntimeException!");
+        } catch (RuntimeException e) {
             // Đúng như mong đợi
         }
     }
@@ -602,6 +728,7 @@ public class QuestionServiceTest {
      */
     @Test
     @Transactional
+    @Rollback
     public void testDeleteQuestion_NullId() {
         // Thử xóa câu hỏi với id null
         try {
@@ -611,4 +738,146 @@ public class QuestionServiceTest {
             // Đúng như mong đợi
         }
     }
+
+    /**
+     * TC_QS_24: Test xóa câu hỏi không tồn tại
+     * Mục tiêu: Kiểm tra phương thức delete xử lý trường hợp câu hỏi không tồn tại
+     * Input: ID = 9999L (không tồn tại trong DB)
+     * Output kỳ vọng: NoSuchElementException
+     */
+    @Test
+    @Transactional
+    @Rollback
+    public void testDeleteQuestion_NotFound() {
+        // Thử xóa câu hỏi với ID không tồn tại
+        try {
+            questionService.delete(999L); // ID không tồn tại
+            Assert.fail("Phải ném ra RuntimeException!");
+        } catch (RuntimeException e) {
+            // Đúng như mong đợi
+        }
+    }
+    
+    /**
+     * TC_QS_25: Test lấy câu hỏi theo questionType null
+     * Mục tiêu: Kiểm tra phương thức getQuestionByQuestionType xử lý trường hợp questionType null
+     * Input: questionType = null
+     * Output kỳ vọng: IllegalArgumentException hoặc NullPointerException
+     */
+    @Test
+    @Transactional
+    public void testGetQuestionByQuestionType_NullType() {
+        // Gọi phương thức với questionType = null
+        try {
+            questionService.getQuestionByQuestionType(null);
+            Assert.fail("Phải ném ra IllegalArgumentException hoặc NullPointerException!");
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Đúng như mong đợi
+        }
+    }
+
+    /**
+     * TC_QS_26: Test lấy câu hỏi theo questionType có tồn tại
+     * Mục tiêu: Kiểm tra phương thức getQuestionByQuestionType trả về danh sách câu hỏi theo questionType
+     * Input: questionType (lấy từ DB)
+     * Output kỳ vọng: List<Question> chứa các câu hỏi thuộc questionType
+     */
+    @Test
+    @Transactional
+    public void testGetQuestionByQuestionType_ExistsWithQuestions() {
+        // Lấy questionType từ DB (ID = 1 tồn tại)
+        Optional<QuestionType> questionTypeOpt = questionTypeService.getQuestionTypeById(1L);
+        Assert.assertTrue("QuestionType không tồn tại!", questionTypeOpt.isPresent());
+
+        // Gọi phương thức
+        List<Question> questions = questionService.getQuestionByQuestionType(questionTypeOpt.get());
+
+        // Kiểm tra kết quả
+        Assert.assertNotNull("Danh sách câu hỏi không được null!", questions);
+        Assert.assertFalse("Danh sách câu hỏi không được rỗng!", questions.isEmpty());
+    }
+
+    // @Test
+    // @Transactional
+    // public void testGetQuestionByQuestionType_ExistsWithoutQuestions() {
+    //     // Tạo questionType mới không có câu hỏi
+    //     QuestionType questionType = new QuestionType();
+    //     questionType.setTypeCode("TestQT");;
+    //     questionTypeService.save(questionType);
+
+    //     // Gọi phương thức
+    //     List<Question> questions = questionService.getQuestionByQuestionType(questionType);
+
+    //     // Kiểm tra kết quả
+    //     Assert.assertNotNull("Danh sách câu hỏi không được null!", questions);
+    //     Assert.assertTrue("Danh sách câu hỏi phải rỗng!", questions.isEmpty());
+    // }
+
+    /**
+     * TC_QS_27: Test lấy câu hỏi theo questionType không tồn tại
+     * Mục tiêu: Kiểm tra phương thức getQuestionByQuestionType xử lý trường hợp questionType không tồn tại
+     * Input: questionType (không tồn tại trong DB)
+     * Output kỳ vọng: Danh sách câu hỏi rỗng
+     */
+    @Test
+    @Transactional
+    public void testGetQuestionByQuestionType_NotExists() {
+        // Tạo questionType không tồn tại trong DB
+        QuestionType questionType = new QuestionType();
+        questionType.setId(999L); // ID không tồn tại
+        questionType.setTypeCode(EQTypeCode.TF);
+        questionType.setDescription("Test Question Type");
+
+        // Gọi phương thức
+        List<Question> questions = questionService.getQuestionByQuestionType(questionType);
+
+        // Kiểm tra kết quả
+        Assert.assertNotNull("Danh sách câu hỏi không được null!", questions);
+        Assert.assertTrue("Danh sách câu hỏi phải rỗng!", questions.isEmpty());
+    }
+
+    /**
+     * TC_QS_28: Test lấy danh sách tất cả câu hỏi
+     * Mục tiêu: Kiểm tra phương thức findAllQuestions trả về danh sách tất cả câu hỏi
+     * Input: Pageable
+     * Output kỳ vọng: Page<Question> chứa tất cả câu hỏi
+     */
+    @Test
+    @Transactional
+    public void testFindAllQuestions_WithQuestions() {
+        // Tạo Pageable
+        Pageable pageable = PageRequest.of(0, 5);
+
+        // Gọi phương thức
+        Page<Question> questionsPage = questionService.findAllQuestions(pageable);
+
+        // Kiểm tra kết quả
+        Assert.assertNotNull("Danh sách câu hỏi không được null!", questionsPage);
+        Assert.assertFalse("Danh sách câu hỏi không được rỗng!", questionsPage.getContent().isEmpty());
+    }
+
+    /**
+     * TC_QS_29: Test lấy danh sách tất cả câu hỏi không có câu hỏi nào
+     * Mục tiêu: Kiểm tra phương thức findAllQuestions trả về danh sách rỗng
+     * Input: Pageable
+     * Output kỳ vọng: Page<Question> rỗng
+     */
+    @Test
+    @Transactional
+    @Rollback
+    public void testFindAllQuestions_NoQuestions() {
+        // Xóa tất cả câu hỏi trong cơ sở dữ liệu
+        questionRepository.deleteAll();
+
+        // Tạo Pageable
+        Pageable pageable = PageRequest.of(0, 5);
+
+        // Gọi phương thức
+        Page<Question> questionsPage = questionService.findAllQuestions(pageable);
+
+        // Kiểm tra kết quả
+        Assert.assertNotNull("Danh sách câu hỏi không được null!", questionsPage);
+        Assert.assertTrue("Danh sách câu hỏi phải rỗng!", questionsPage.getContent().isEmpty());
+    }
+
 }

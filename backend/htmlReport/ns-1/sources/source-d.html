@@ -1,0 +1,202 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > QuestionTypeController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.thanhtam.backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: QuestionTypeController (com.thanhtam.backend.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">QuestionTypeController</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (2/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    27.3%
+  </span>
+  <span class="absValue">
+    (3/11)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">QuestionTypeController$$EnhancerBySpringCGLIB$$8c02a9ea</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (2/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    27.3%
+  </span>
+  <span class="absValue">
+    (3/11)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.thanhtam.backend.controller;
+&nbsp;
+&nbsp;import com.thanhtam.backend.dto.ServiceResult;
+&nbsp;import com.thanhtam.backend.entity.QuestionType;
+&nbsp;import com.thanhtam.backend.service.QuestionTypeService;
+&nbsp;import com.thanhtam.backend.ultilities.EQTypeCode;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@CrossOrigin(origins = &quot;*&quot;, maxAge = 3600)
+&nbsp;@RequestMapping(value = &quot;/api&quot;)
+&nbsp;@RestController
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class QuestionTypeController {
+&nbsp;    private QuestionTypeService questionTypeService;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public QuestionTypeController(QuestionTypeService questionTypeService) {</b>
+<b class="fc">&nbsp;        this.questionTypeService = questionTypeService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/question-types&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;
+&nbsp;    public List&lt;QuestionType&gt; getAllQuestionType() {
+<b class="nc">&nbsp;        List&lt;QuestionType&gt; questionTypeList = questionTypeService.getQuestionTypeList();</b>
+<b class="nc">&nbsp;        log.info(questionTypeList.toString());</b>
+&nbsp;
+<b class="nc">&nbsp;        return questionTypeList;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/question-types/{id}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;
+&nbsp;    public QuestionType getQuestionTypeById(@PathVariable Long id) {
+<b class="nc">&nbsp;        QuestionType questionType = questionTypeService.getQuestionTypeById(id).get();</b>
+<b class="nc">&nbsp;        return questionType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/question-types/{typeCode}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;
+&nbsp;    public QuestionType getQuestionTypeByTypeCode(@PathVariable String typeCode) {
+<b class="nc">&nbsp;        EQTypeCode eqTypeCode = EQTypeCode.valueOf(typeCode);</b>
+<b class="nc">&nbsp;        QuestionType questionType = questionTypeService.getQuestionTypeByCode(eqTypeCode).get();</b>
+<b class="nc">&nbsp;        return questionType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;//    @PostMapping(value = &quot;/question-types&quot;)
+&nbsp;//    public ResponseEntity&lt;Object&gt; createQuestionType(@Valid @RequestBody QuestionType questionType) {
+&nbsp;//        try {
+&nbsp;//            questionTypeService.saveQuestionType(questionType);
+&nbsp;//            return ResponseEntity.ok().body(new ServiceResult(HttpStatus.CREATED.value(), &quot;Created question type successfully!&quot;, questionType));
+&nbsp;//        } catch (Exception e) {
+&nbsp;//            return ResponseEntity.badRequest().body(e.toString());
+&nbsp;//        }
+&nbsp;//
+&nbsp;//
+&nbsp;//    }
+&nbsp;//
+&nbsp;//    @PutMapping(value = &quot;/question-types/{id}&quot;)
+&nbsp;//    public ResponseEntity&lt;?&gt; updateCourse(@Valid @RequestBody QuestionType questionType, @PathVariable Long id) {
+&nbsp;//        Optional&lt;QuestionType&gt; questionTypeOptional = questionTypeService.getQuestionTypeById(id);
+&nbsp;//        if (!questionTypeOptional.isPresent()) {
+&nbsp;//            throw new EntityNotFoundException(&quot;Not found with question type id: &quot; + id + &quot; successfully!&quot;);
+&nbsp;//        }
+&nbsp;//        questionType.setId(id);
+&nbsp;//        questionTypeService.saveQuestionType(questionType);
+&nbsp;//        return ResponseEntity.ok().body(new ServiceResult(HttpStatus.OK.value(), &quot;Update question type with id: &quot; + id, questionType));
+&nbsp;//    }
+&nbsp;//
+&nbsp;//    @DeleteMapping(value = &quot;/question-types/{id}&quot;)
+&nbsp;//    public ResponseEntity&lt;?&gt; deleteCourse(@PathVariable Long id) {
+&nbsp;//        Optional&lt;QuestionType&gt; questionTypeOptional = questionTypeService.getQuestionTypeById(id);
+&nbsp;//        if (!questionTypeOptional.isPresent()) {
+&nbsp;//            throw new EntityNotFoundException(&quot;Not found with question type id:&quot; + id + &quot; successfully!&quot;);
+&nbsp;//        }
+&nbsp;//        questionTypeService.delete(id);
+&nbsp;//        return ResponseEntity.ok().body(new ServiceResult(HttpStatus.NO_CONTENT.value(), &quot;Deleted question type with id: &quot; + id + &quot; successfully!&quot;, null));
+&nbsp;//    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-05-15 11:25</div>
+</div>
+</body>
+</html>

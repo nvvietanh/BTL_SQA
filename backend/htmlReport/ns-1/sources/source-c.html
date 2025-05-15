@@ -1,0 +1,296 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > QuestionController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.thanhtam.backend.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: QuestionController (com.thanhtam.backend.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">QuestionController</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.4%
+  </span>
+  <span class="absValue">
+    (61/66)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">QuestionController$$EnhancerBySpringCGLIB$$cbe3a21c</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (9/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.4%
+  </span>
+  <span class="absValue">
+    (61/66)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.thanhtam.backend.controller;
+&nbsp;
+&nbsp;import com.thanhtam.backend.dto.PageResult;
+&nbsp;import com.thanhtam.backend.dto.ServiceResult;
+&nbsp;import com.thanhtam.backend.entity.*;
+&nbsp;import com.thanhtam.backend.service.*;
+&nbsp;import com.thanhtam.backend.ultilities.EQTypeCode;
+&nbsp;import com.thanhtam.backend.ultilities.ERole;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.web.PageableDefault;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import javax.validation.Valid;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@CrossOrigin(origins = &quot;*&quot;, maxAge = 3600)
+&nbsp;@RequestMapping(value = &quot;/api&quot;)
+&nbsp;@RestController
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class QuestionController {
+&nbsp;    private QuestionService questionService;
+&nbsp;    private PartService partService;
+&nbsp;    private QuestionTypeService questionTypeService;
+&nbsp;    private UserService userService;
+&nbsp;    private RoleService roleService;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public QuestionController(QuestionService questionService, PartService partService, QuestionTypeService questionTypeService, UserService userService, RoleService roleService) {</b>
+<b class="fc">&nbsp;        this.questionService = questionService;</b>
+<b class="fc">&nbsp;        this.partService = partService;</b>
+<b class="fc">&nbsp;        this.questionTypeService = questionTypeService;</b>
+<b class="fc">&nbsp;        this.userService = userService;</b>
+<b class="fc">&nbsp;        this.roleService = roleService;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/questions&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;ServiceResult&gt; getAllQuestion() {
+&nbsp;        List&lt;Question&gt; questionList = questionService.getQuestionList();
+<b class="fc">&nbsp;        log.info(questionList.toString());</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok().body(new ServiceResult(HttpStatus.OK.value(), &quot;Get question bank successfully!&quot;, questionList));</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/questions/{id}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; getQuestionById(@PathVariable Long id) {
+&nbsp;        Optional&lt;Question&gt; questionOptional = questionService.getQuestionById(id);
+&nbsp;        if (!questionOptional.isPresent()) {
+<b class="fc">&nbsp;            return ResponseEntity.ok().body(new ServiceResult(HttpStatus.NOT_FOUND.value(), &quot;Not found with id: &quot; + id, null));</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok().body(questionOptional.get());</b>
+&nbsp;    }
+<b class="fc">&nbsp;</b>
+&nbsp;    //    Get list of question by part
+&nbsp;    @GetMapping(value = &quot;/parts/{partId}/questions&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;    public PageResult getQuestionsByPart(@PageableDefault(page = 0, size = 10, sort = &quot;id&quot;) Pageable pageable, @PathVariable Long partId) {
+&nbsp;        String username = userService.getUserName();
+&nbsp;        User user = userService.getUserByUsername(username).get();
+<b class="fc">&nbsp;        Role role = roleService.findByName(ERole.ROLE_ADMIN).get();</b>
+<b class="fc">&nbsp;        boolean isAdmin = user.getRoles().contains(role);</b>
+<b class="fc">&nbsp;</b>
+<b class="fc">&nbsp;        Page&lt;Question&gt; questions;</b>
+&nbsp;        // N?u partId = 0 thì l?y t?t c? câu h?i mà ng??i dùng ?ã t?o
+&nbsp;        // N?u là admin thì l?y t?t c? câu h?i
+&nbsp;        if (partId == 0) {
+&nbsp;            if(isAdmin){
+<b class="fc">&nbsp;                questions = questionService.findAllQuestions(pageable);</b>
+<b class="fc">&nbsp;                return new PageResult(questions);</b>
+<b class="fc">&nbsp;            }</b>
+<b class="fc">&nbsp;            questions = questionService.findQuestionsByCreatedBy_Username(pageable, username);</b>
+&nbsp;            return new PageResult(questions);
+<b class="fc">&nbsp;</b>
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // N?u partId != 0 và là admin thì l?y t?t c? câu h?i c?a partId
+&nbsp;        if (isAdmin) {
+&nbsp;            Part part = partService.findPartById(partId).get();
+<b class="fc">&nbsp;            questions = questionService.findQuestionsByPart(pageable, part);</b>
+<b class="fc">&nbsp;            return new PageResult(questions);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        questions = questionService.findQuestionsByPart_IdAndCreatedBy_Username(pageable, partId, username);</b>
+&nbsp;        return new PageResult(questions);
+<b class="fc">&nbsp;</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/parts/{partId}/questions/false/deleted&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;    public PageResult getQuestionsByPartNotDeleted(@PageableDefault(page = 0, size = 10, sort = &quot;id&quot;) Pageable pageable, @PathVariable Long partId) {
+&nbsp;        String username = userService.getUserName();
+&nbsp;        User user = userService.getUserByUsername(username).get();
+<b class="fc">&nbsp;        Role role = roleService.findByName(ERole.ROLE_ADMIN).get();</b>
+<b class="fc">&nbsp;        boolean isAdmin = user.getRoles().contains(role);</b>
+<b class="fc">&nbsp;        Page&lt;Question&gt; questions;</b>
+<b class="fc">&nbsp;        if (isAdmin) {</b>
+&nbsp;            Part part = partService.findPartById(partId).get();
+<b class="fc">&nbsp;            questions = questionService.findQuestionsByPartAndDeletedFalse(pageable, part);</b>
+<b class="fc">&nbsp;            return new PageResult(questions);</b>
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        questions = questionService.findQuestionsByPart_IdAndCreatedBy_UsernameAndDeletedFalse(pageable, partId, username);</b>
+&nbsp;        return new PageResult(questions);
+<b class="fc">&nbsp;    }</b>
+<b class="fc">&nbsp;</b>
+&nbsp;//    Get list of question by question type
+&nbsp;
+&nbsp;    @GetMapping(value = &quot;/question-types/{typeId}/questions&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; getQuestionByQuestionType(@PathVariable Long typeId) {
+&nbsp;        if (questionTypeService.existsById(typeId)) {
+&nbsp;
+&nbsp;            QuestionType questionType = questionTypeService.getQuestionTypeById(typeId).get();
+<b class="fc">&nbsp;            List&lt;Question&gt; questionList = questionService.getQuestionByQuestionType(questionType);</b>
+&nbsp;            return ResponseEntity.ok().body(new ServiceResult(HttpStatus.OK.value(), &quot;Get question list with question type id: &quot; + typeId, questionList));
+<b class="fc">&nbsp;        }</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok().body(new ServiceResult(HttpStatus.NOT_FOUND.value(), &quot;Not found question type with id: &quot; + typeId, null));</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+<b class="fc">&nbsp;    @PostMapping(value = &quot;/questions&quot;)</b>
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;    public Question createQuestion(@Valid @RequestBody Question question, @RequestParam String questionType, @RequestParam Long partId) {
+&nbsp;        EQTypeCode eqTypeCode = EQTypeCode.valueOf(questionType);
+&nbsp;        QuestionType questionType1 = questionTypeService.getQuestionTypeByCode(eqTypeCode).get();
+&nbsp;        Part part = partService.findPartById(partId).get();
+<b class="fc">&nbsp;</b>
+<b class="fc">&nbsp;        question.setQuestionType(questionType1);</b>
+<b class="fc">&nbsp;        question.setPart(part);</b>
+&nbsp;        question.setDeleted(false);
+<b class="fc">&nbsp;        questionService.save(question);</b>
+<b class="fc">&nbsp;        Question questionCreated = questionService.getQuestionById(question.getId()).get();</b>
+<b class="fc">&nbsp;        log.info(questionCreated.toString());</b>
+<b class="fc">&nbsp;        return questionCreated;</b>
+<b class="fc">&nbsp;    }</b>
+<b class="fc">&nbsp;</b>
+<b class="fc">&nbsp;    @PutMapping(value = &quot;/questions/{id}&quot;)</b>
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; updateQuestion(@Valid @RequestBody Question question, @PathVariable Long id) {
+&nbsp;        Optional&lt;Question&gt; questionReq = questionService.getQuestionById(id);
+&nbsp;        if (!questionReq.isPresent()) {
+&nbsp;            return ResponseEntity.ok().body(new ServiceResult(HttpStatus.NOT_FOUND.value(), &quot;Not found with id: &quot; + id, null));
+&nbsp;        }
+<b class="fc">&nbsp;        question.setId(id);</b>
+<b class="fc">&nbsp;        questionService.save(question);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok().body(new ServiceResult(HttpStatus.OK.value(), &quot;Get question with id: &quot; + id, question));</b>
+&nbsp;    }
+<b class="fc">&nbsp;</b>
+<b class="fc">&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;) or hasRole(&#39;LECTURER&#39;)&quot;)</b>
+<b class="fc">&nbsp;    @GetMapping(value = &quot;/questions/{id}/deleted/{deleted}&quot;)</b>
+&nbsp;    public ResponseEntity&lt;?&gt; deleteTempQuestion(@PathVariable Long id, @PathVariable boolean deleted) {
+&nbsp;        log.error(&quot;Deleted&quot;);
+&nbsp;        Question question = questionService.getQuestionById(id).get();
+&nbsp;        question.setDeleted(deleted);
+&nbsp;        questionService.update(question);
+<b class="nc">&nbsp;        return ResponseEntity.noContent().build();</b>
+<b class="nc">&nbsp;    }</b>
+<b class="nc">&nbsp;</b>
+<b class="nc">&nbsp;}</b>
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-05-15 11:25</div>
+</div>
+</body>
+</html>
