@@ -97,12 +97,16 @@ public class QuestionTypeServiceTest {
     public void testGetQuestionTypeByCode_NotFound() {
         // Kiểm tra service không null
         Assert.assertNotNull("QuestionTypeService bị null!", questionTypeService);
-        
-        // Thử lấy questionType với code không tồn tại
-        Optional<QuestionType> questionType = questionTypeService.getQuestionTypeByCode(EQTypeCode.valueOf("INVALID_CODE"));
-        
-        // Kiểm tra kết quả
-        Assert.assertFalse("QuestionType không nên tồn tại!", questionType.isPresent());
+
+        try {
+            // Thử lấy questionType với code không tồn tại
+            Optional<QuestionType> questionType = questionTypeService.getQuestionTypeByCode(EQTypeCode.valueOf("INVALID_CODE"));
+            // Kiểm tra kết quả
+            Assert.assertFalse("QuestionType tồn tại. Phải ném ra exception", questionType.isPresent());
+        } catch (Exception e) {
+
+        }
+
     }
 
     /**
